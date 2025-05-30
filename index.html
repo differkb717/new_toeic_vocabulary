@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新多益核心單字練習遊戲</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Helvetica Neue', 'Helvetica', sans-serif; /* Changed font for better readability */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333; /* Default text color */
+        }
+
+        .container {
+            max-width: 900px; /* Increased max-width for potentially more content */
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98); /* Slightly more opaque */
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow */
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #4a5bd4;
+            font-size: 2.2em; /* Adjusted size */
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #555; /* Darker subtitle */
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+
+        .unit-selector { /* Renamed from week-selector for clarity */
+            margin: 20px 0;
+        }
+
+        .unit-selector select {
+            padding: 12px 20px; /* Increased padding */
+            border-radius: 10px;
+            border: 2px solid #ccc; /* Slightly darker border */
+            font-size: 1.1em;
+            background: white;
+            cursor: pointer;
+        }
+
+        .game-modes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Adjusted minmax */
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            border: none;
+            padding: 18px; /* Adjusted padding */
+            border-radius: 15px;
+            font-size: 1.05em; /* Adjusted font size */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex; /* For aligning icon and text */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .mode-btn small {
+            font-size: 0.8em;
+            margin-top: 5px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px) scale(1.03); /* Added scale effect */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .mode-btn.quiz { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+        .mode-btn.match { background: linear-gradient(45deg, #43e97b, #38f9d7); }
+        .mode-btn.typing { background: linear-gradient(45deg, #fa709a, #fee140); }
+        .mode-btn.study { background: linear-gradient(45deg, #ff7e5f, #feb47b); } /* New study mode button */
+
+
+        .game-area {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .question-card, .study-card { /* Added study-card */
+            background: white;
+            border-radius: 15px;
+            padding: 25px; /* Adjusted padding */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .question, .study-word-english { /* Added study-word-english */
+            font-size: 1.8em; /* Adjusted size */
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .study-word-details {
+            text-align: left;
+            font-size: 1em;
+            line-height: 1.8;
+        }
+        .study-word-details p {
+            margin-bottom: 8px;
+        }
+        .study-word-details strong {
+            color: #4a5bd4;
+        }
+
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjusted minmax */
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .option-btn {
+            background: #f8f9ff;
+            border: 2px solid #e0e6ff; /* Thinner border */
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1em; /* Adjusted font size */
+            cursor: pointer;
+            transition: all 0.2s ease; /* Faster transition */
+        }
+
+        .option-btn:hover {
+            background: #e0e6ff;
+            transform: scale(1.03);
+        }
+
+        .option-btn.correct {
+            background: #d4edda !important; /* Ensure override */
+            border-color: #28a745 !important;
+            color: #155724 !important;
+        }
+
+        .option-btn.wrong {
+            background: #f8d7da !important; /* Ensure override */
+            border-color: #dc3545 !important;
+            color: #721c24 !important;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            background: linear-gradient(45deg, #5b6aae, #69408a); /* Adjusted gradient */
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+        .score-item div:first-child { /* Label */
+             font-size: 0.9em;
+             margin-bottom: 3px;
+        }
+
+        .score-number {
+            font-size: 1.8em; /* Adjusted size */
+            font-weight: bold;
+        }
+
+        .input-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            font-size: 1.2em; /* Adjusted size */
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: block;
+            text-align: center;
+        }
+
+        .submit-btn, .action-btn { /* Added action-btn for general buttons */
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px; /* Adjusted padding */
+            border-radius: 10px;
+            font-size: 1.1em; /* Adjusted size */
+            cursor: pointer;
+            margin: 10px 5px; /* Adjusted margin */
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        .submit-btn:hover, .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .feedback-message { /* Renamed from feedback for clarity */
+            font-size: 1.3em; /* Adjusted size */
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none; /* Initially hidden */
+        }
+
+        .feedback-message.correct {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .feedback-message.wrong {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        .feedback-message.info { /* For general info messages */
+            background: #e2e3e5;
+            color: #383d41;
+            display: block;
+        }
+
+
+        .match-area-grid { /* Renamed from match-area to avoid conflict */
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .match-column {
+            background: #f8f9ff;
+            padding: 15px; /* Adjusted padding */
+            border-radius: 10px;
+            border: 2px solid #e0e6ff;
+        }
+        .match-column h4 {
+            margin-bottom: 10px;
+            color: #4a5bd4;
+        }
+
+        .match-item {
+            background: white;
+            padding: 12px; /* Adjusted padding */
+            margin: 8px 0; /* Adjusted margin */
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            font-size: 0.95em;
+        }
+
+        .match-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .match-item.selected {
+            border-color: #4facfe;
+            background: #e6f3ff;
+        }
+
+        .match-item.matched {
+            background: #c8e6c9 !important; /* Lighter green for matched */
+            border-color: #66bb6a !important;
+            color: #2e7d32;
+            cursor: default;
+            opacity: 0.7;
+        }
+        .match-item.wrong-flash { /* For temporary wrong indication */
+            background-color: #ffcdd2 !important;
+            border-color: #e57373 !important;
+        }
+
+
+        .progress-bar {
+            width: 100%;
+            height: 12px; /* Slightly thicker */
+            background: #e0e6ff;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            transition: width 0.3s ease;
+            border-radius: 6px;
+        }
+        
+        #alertMessage {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffc107;
+            color: #333;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-size: 1.1em;
+        }
+
+
+        @media (max-width: 700px) { /* Adjusted breakpoint */
+            .container {
+                padding: 20px;
+            }
+            h1 { font-size: 1.8em; }
+            .subtitle { font-size: 1em; }
+            .game-modes { grid-template-columns: 1fr; } /* Single column for smaller screens */
+            .match-area-grid { grid-template-columns: 1fr; }
+            .options { grid-template-columns: 1fr; }
+            .question, .study-word-english { font-size: 1.5em; }
+            .input-box { font-size: 1.1em; }
+            .submit-btn, .action-btn { font-size: 1em; padding: 10px 20px;}
+            .feedback-message { font-size: 1.1em; }
+        }
+    </style>
+</head>
+<body>
+    <div id="alertMessage">請先選擇一個單元！</div>
+
+    <div class="container">
+        <h1>🌟 新多益核心單字練習 🌟</h1>
+        <p class="subtitle">紮實基礎，邁向高分！</p>
+
+        <div class="unit-selector">
+            <select id="unitSelect">
+                <option value="">--- 請選擇單元 ---</option>
+                <option value="unit1">Unit 1 - 一般 商務 (1)</option>
+                <option value="unit2">Unit 2 - 一般 商務 (2)</option>
+                <option value="unit3">Unit 3 - 一般 商務 (3)</option>
+                <option value="unit4">Unit 4 - 製造業 (1)</option>
+                <option value="unit5">Unit 5 - 製造業 (2)</option>
+                <option value="unit6">Unit 6 - 金融 / 預算 / 經濟 (1)</option>
+                <option value="unit7">Unit 7 - 金融 / 預算 / 經濟 (2)</option>
+                <option value="unit8">Unit 8 - 辦公室 (1)</option>
+                <option value="unit9">Unit 9 - 辦公室 (2)</option> 
+                <option value="unit10">Unit 10 - 辦公室 (3)</option></select>
+        </div>
+
+        <div class="game-modes">
+            <button class="mode-btn study" onclick="startGame('study')">
+                📚 單字學習<br>
+                <small>查看單字詳細資訊</small>
+            </button>
+            <button class="mode-btn quiz" onclick="startGame('quiz')">
+                📝 選擇題測驗<br>
+                <small>選出正確的中文意思</small>
+            </button>
+            <button class="mode-btn match" onclick="startGame('match')">
+                🔗 配對遊戲<br>
+                <small>英文單字配中文意思</small>
+            </button>
+            <button class="mode-btn typing" onclick="startGame('typing')">
+                ⌨️ 拼字練習<br>
+                <small>看中文打英文</small>
+            </button>
+        </div>
+
+        <div id="gameArea" class="game-area">
+            <div class="score-board">
+                <div class="score-item">
+                    <div>得分</div>
+                    <div class="score-number" id="score">0</div>
+                </div>
+                <div class="score-item">
+                    <div>第幾題</div>
+                    <div class="score-number" id="currentQuestionDisplay">1</div>
+                </div>
+                <div class="score-item">
+                    <div>總題數</div>
+                    <div class="score-number" id="totalQuestionsDisplay">25</div>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div id="studyArea" class="study-card" style="display:none;">
+                <div class="study-word-english" id="studyWordEnglish"></div>
+                <div class="study-word-details" id="studyWordDetails"></div>
+                <div style="margin-top: 20px;">
+                    <button class="action-btn" id="studyPrevBtn" onclick="navigateStudyWord(-1)" style="display:none;">上一字</button>
+                    <button class="action-btn" id="studyNextBtn" onclick="navigateStudyWord(1)" style="display:none;">下一字</button>
+                </div>
+            </div>
+
+            <div id="quizArea" class="question-card" style="display:none;">
+                <div class="question" id="quizQuestion"></div>
+                <div class="options" id="quizOptions"></div>
+                <div class="feedback-message" id="quizFeedback"></div>
+                <button class="action-btn" id="quizNextBtn" onclick="nextQuestion()" style="display:none;">下一題</button>
+            </div>
+
+            <div id="typingArea" class="question-card" style="display:none;">
+                <div class="question" id="typingQuestion"></div>
+                <input type="text" class="input-box" id="typingInput" placeholder="請輸入英文單字">
+                <button class="submit-btn" onclick="checkTyping()">確認答案</button>
+                <div class="feedback-message" id="typingFeedback"></div>
+                <button class="action-btn" id="typingNextBtn" onclick="nextQuestion()" style="display:none;">下一題</button>
+            </div>
+
+            <div id="matchModeArea" style="display:none;"> <h3>點選配對的英文和中文</h3>
+                <div class="match-area-grid">
+                    <div class="match-column">
+                        <h4>英文單字</h4>
+                        <div id="englishWordsColumn"></div>
+                    </div>
+                    <div class="match-column">
+                        <h4>中文意思</h4>
+                        <div id="chineseWordsColumn"></div>
+                    </div>
+                </div>
+                <div class="feedback-message" id="matchFeedback"></div>
+                <button class="action-btn" id="matchNextBtn" onclick="nextQuestion()" style="display:none;">下一組</button>
+            </div>
+            <div style="margin-top: 30px;">
+                 <button class="action-btn" onclick="backToMenu()">回到主選單</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 單字資料庫
+        const vocabulary = {
+            unit1: [
+                { id: '1', category: '一般 商務 (1)', english: 'accept', kk: '[əkˈsɛpt]', partOfSpeech: 'v.', chinese: '接受；同意', exampleSentence: 'She decided to accept the job offer.', exampleSentenceChinese: '她決定接受這份工作邀約。' },
+                { id: '2', category: '一般 商務 (1)', english: 'aim', kk: '[em]', partOfSpeech: 'v./n.', chinese: '瞄準；意圖；目標', exampleSentence: 'The company aims to increase its market share.', exampleSentenceChinese: '該公司旨在提高其市場佔有率。' },
+                { id: '3', category: '一般 商務 (1)', english: 'associate', kk: '[əˈsoʊʃiˌet]', partOfSpeech: 'v./n./adj.', chinese: '聯繫；夥伴；副的', exampleSentence: 'He is an associate professor at the university.', exampleSentenceChinese: '他是該大學的副教授。' },
+                { id: '4', category: '一般 商務 (1)', english: 'boost', kk: '[bust]', partOfSpeech: 'v./n.', chinese: '提升；促進', exampleSentence: 'The new advertisement helped to boost sales.', exampleSentenceChinese: '新的廣告有助於提升銷售額。' },
+                { id: '5', category: '一般 商務 (1)', english: 'campaign', kk: '[kæmˈpen]', partOfSpeech: 'n./v.', chinese: '活動；運動', exampleSentence: 'They launched a new marketing campaign.', exampleSentenceChinese: '他們發起了一項新的行銷活動。' },
+                { id: '6', category: '一般 商務 (1)', english: 'collaborate', kk: '[kəˈlæbəˌreɪt]', partOfSpeech: 'v.', chinese: '合作；協作', exampleSentence: 'The two companies will collaborate on the project.', exampleSentenceChinese: '這兩家公司將在該專案上合作。' },
+                { id: '7', category: '一般 商務 (1)', english: 'compete', kk: '[kəmˈpit]', partOfSpeech: 'v.', chinese: '競爭；比賽', exampleSentence: 'Several companies are competing for the contract.', exampleSentenceChinese: '有幾家公司正在競爭這份合約。' },
+                { id: '8', 'category': '一般 商務 (1)', english: 'consent', kk: '[kənˈsɛnt]', partOfSpeech: 'n./v.', chinese: '同意；贊成', exampleSentence: 'You need your parents\' consent to go on the trip.', exampleSentenceChinese: '你需要你父母的同意才能去旅行。' },
+                { id: '9', category: '一般 商務 (1)', english: 'convention', kk: '[kənˈvɛnʃən]', partOfSpeech: 'n.', chinese: '會議；慣例', exampleSentence: 'The annual sales convention will be held in May.', exampleSentenceChinese: '年度銷售會議將於五月舉行。' },
+                { id: '10', category: '一般 商務 (1)', english: 'deal', kk: '[dil]', partOfSpeech: 'n./v.', chinese: '交易；處理', exampleSentence: 'They made a deal to share the profits.', exampleSentenceChinese: '他們達成協議分享利潤。' },
+                { id: '11', category: '一般 商務 (1)', english: 'display', kk: '[dɪˈsple]', partOfSpeech: 'v./n.', chinese: '展示；陳列', exampleSentence: 'The museum will display ancient artifacts.', exampleSentenceChinese: '博物館將展出古代文物。' },
+                { id: '12', category: '一般 商務 (1)', english: 'expiration', kk: '[ˌɛkspəˈreʃən]', partOfSpeech: 'n.', chinese: '到期；期滿', exampleSentence: 'Please check the expiration date on the milk carton.', exampleSentenceChinese: '請檢查牛奶盒上的有效期限。' },
+                { id: '13', category: '一般 商務 (1)', english: 'flyer', kk: '[ˈflaɪɚ]', partOfSpeech: 'n.', chinese: '傳單；飛行員', exampleSentence: 'They distributed flyers to promote the event.', exampleSentenceChinese: '他們分發傳單來宣傳活動。' },
+                { id: '14', category: '一般 商務 (1)', english: 'icebreaker', kk: '[ˈaɪsˌbrekɚ]', partOfSpeech: 'n.', chinese: '打破僵局的方法；破冰船', exampleSentence: 'The speaker started with an icebreaker to relax the audience.', exampleSentenceChinese: '演講者以一個打破僵局的笑話開始，讓聽眾放鬆。' },
+                { id: '15', category: '一般 商務 (1)', english: 'logo', kk: '[ˈlogoʊ]', partOfSpeech: 'n.', chinese: '標誌；商標', exampleSentence: 'The company\'s logo is recognized worldwide.', exampleSentenceChinese: '該公司的標誌在世界各地都得到認可。' },
+                { id: '16', category: '一般 商務 (1)', english: 'participant', kk: '[pɑrˈtɪsəpənt]', partOfSpeech: 'n.', chinese: '參與者；參加者', exampleSentence: 'All participants will receive a certificate.', exampleSentenceChinese: '所有參與者都將獲得證書。' },
+                { id: '17', category: '一般 商務 (1)', english: 'postpone', kk: '[poʊstˈpoʊn]', partOfSpeech: 'v.', chinese: '延期；延後', exampleSentence: 'They had to postpone the meeting until next week.', exampleSentenceChinese: '他們不得不將會議延期到下週。' },
+                { id: '18', category: '一般 商務 (1)', english: 'project', kk: '[ˈprɑdʒɛkt]', partOfSpeech: 'n./v.', chinese: '專案；計畫；投射', exampleSentence: 'This is a very important project for our company.', exampleSentenceChinese: '這對我們公司來說是一個非常重要的專案。' },
+                { id: '19', category: '一般 商務 (1)', english: 'questionnaire', kk: '[ˌkwɛstʃəˈnɛr]', partOfSpeech: 'n.', chinese: '問卷；調查表', exampleSentence: 'Please fill out this questionnaire after the seminar.', exampleSentenceChinese: '研討會結束後請填寫這份問卷。' },
+                { id: '20', category: '一般 商務 (1)', english: 'sales', kk: '[selz]', partOfSpeech: 'n.', chinese: '銷售額；業務', exampleSentence: 'The company reported a significant increase in sales.', exampleSentenceChinese: '該公司報告銷售額大幅增長。' },
+                { id: '21', category: '一般 商務 (1)', english: 'schedule', kk: '[ˈskɛdʒʊl]', partOfSpeech: 'n./v.', chinese: '時間表；安排', exampleSentence: 'What is your schedule for tomorrow?', exampleSentenceChinese: '你明天的時間表是什麼？' },
+                { id: '22', category: '一般 商務 (1)', english: 'spokesperson', kk: '[ˈspoʊksˌpɜrsən]', partOfSpeech: 'n.', chinese: '發言人', exampleSentence: 'The company spokesperson addressed the media.', exampleSentenceChinese: '公司發言人向媒體發表了講話。' },
+                { id: '23', category: '一般 商務 (1)', english: 'strategy', kk: '[ˈstrætədʒi]', partOfSpeech: 'n.', chinese: '策略；戰略', exampleSentence: 'We need a new marketing strategy to attract more customers.', exampleSentenceChinese: '我們需要一個新的行銷策略來吸引更多顧客。' },
+                { id: '24', category: '一般 商務 (1)', english: 'survey', kk: '[ˈsɜrˌve]', partOfSpeech: 'n./v.', chinese: '調查；測量', exampleSentence: 'They conducted a survey to gather customer feedback.', exampleSentenceChinese: '他們進行了一項調查以收集客戶回饋。' },
+                { id: '25', category: '一般 商務 (1)', english: 'trade', kk: '[tred]', partOfSpeech: 'n./v.', chinese: '貿易；交易', exampleSentence: 'International trade is vital for the economy.', exampleSentenceChinese: '國際貿易對經濟至關重要。' }
+            ],
+            unit2: [
+                { id: '1', category: '一般 商務 (2)', english: 'adjust', kk: '[əˈdʒʌst]', partOfSpeech: 'v.', chinese: '調整；適應', exampleSentence: 'The mechanic will adjust the engine.', exampleSentenceChinese: '技師將會調整引擎。' },
+                { id: '2', category: '一般 商務 (2)', english: 'alteration', kk: '[ˌɔltəˈreʃən]', partOfSpeech: 'n.', chinese: '變更；修改', exampleSentence: 'We need to make some alterations to the plan.', exampleSentenceChinese: '我們需要對計畫做一些修改。' },
+                { id: '3', category: '一般 商務 (2)', english: 'attend', kk: '[əˈtɛnd]', partOfSpeech: 'v.', chinese: '出席；參加', exampleSentence: 'Will you attend the conference next week?', exampleSentenceChinese: '你下週會參加會議嗎？' },
+                { id: '4', category: '一般 商務 (2)', english: 'brainstorm', kk: '[ˈbrenˌstɔrm]', partOfSpeech: 'v./n.', chinese: '腦力激盪', exampleSentence: 'Let\'s brainstorm some ideas for the new project.', exampleSentenceChinese: '讓我們為新專案集思廣益一些點子。' },
+                { id: '5', category: '一般 商務 (2)', english: 'chairperson', kk: '[ˈtʃɛrˌpɜrsən]', partOfSpeech: 'n.', chinese: '主席', exampleSentence: 'The chairperson opened the meeting.', exampleSentenceChinese: '主席宣布會議開始。' },
+                { id: '6', category: '一般 商務 (2)', english: 'commercial', kk: '[kəˈmɜrʃəl]', partOfSpeech: 'adj./n.', chinese: '商業的；廣告', exampleSentence: 'This is a commercial district with many shops.', exampleSentenceChinese: '這是一個有很多商店的商業區。' },
+                { id: '7', category: '一般 商務 (2)', english: 'conference', kk: '[ˈkɑnfərəns]', partOfSpeech: 'n.', chinese: '會議；研討會', exampleSentence: 'The annual marketing conference attracts many professionals.', exampleSentenceChinese: '年度行銷研討會吸引了許多專業人士。' },
+                { id: '8', category: '一般 商務 (2)', english: 'contact', kk: '[ˈkɑnˌtækt]', partOfSpeech: 'n./v.', chinese: '聯絡；接觸', exampleSentence: 'Please contact customer service for assistance.', exampleSentenceChinese: '請聯繫客服尋求協助。' },
+                { id: '9', category: '一般 商務 (2)', english: 'cooperate', kk: '[koʊˈɑpəˌreɪt]', partOfSpeech: 'v.', chinese: '合作', exampleSentence: 'The two departments will cooperate on this task.', exampleSentenceChinese: '這兩個部門將合作完成這項任務。' },
+                { id: '10', category: '一般 商務 (2)', english: 'demonstration', kk: '[ˌdɛmənˈstreʃən]', partOfSpeech: 'n.', chinese: '示範；展示', exampleSentence: 'The chef gave a cooking demonstration.', exampleSentenceChinese: '廚師進行了烹飪示範。' },
+                { id: '11', category: '一般 商務 (2)', english: 'draft', kk: '[dræft]', partOfSpeech: 'n./v.', chinese: '草稿；起草', exampleSentence: 'He is working on the first draft of his report.', exampleSentenceChinese: '他正在撰寫報告的初稿。' },
+                { id: '12', category: '一般 商務 (2)', english: 'figure', kk: '[ˈfɪgjər]', partOfSpeech: 'n./v.', chinese: '數字；人物；認為', exampleSentence: 'Sales figures have increased this quarter.', exampleSentenceChinese: '本季的銷售數字有所增長。' },
+                { id: '13', category: '一般 商務 (2)', english: 'giveaway', kk: '[ˈgɪvəˌwe]', partOfSpeech: 'n.', chinese: '贈品；洩漏', exampleSentence: 'The store is having a promotional giveaway.', exampleSentenceChinese: '這家商店正在進行促銷贈品活動。' },
+                { id: '14', category: '一般 商務 (2)', english: 'launch', kk: '[lɔntʃ]', partOfSpeech: 'v./n.', chinese: '發起；推出；發射', exampleSentence: 'The company will launch its new product next month.', exampleSentenceChinese: '該公司將於下個月推出其新產品。' },
+                { id: '15', category: '一般 商務 (2)', english: 'market', kk: '[ˈmɑrkɪt]', partOfSpeech: 'n./v.', chinese: '市場；銷售', exampleSentence: 'They are trying to enter the Asian market.', exampleSentenceChinese: '他們正試圖進入亞洲市場。' },
+                { id: '16', category: '一般 商務 (2)', english: 'partner', kk: '[ˈpɑrtnər]', partOfSpeech: 'n./v.', chinese: '夥伴；合夥人', exampleSentence: 'She is a partner in a law firm.', exampleSentenceChinese: '她是一家律師事務所的合夥人。' },
+                { id: '17', category: '一般 商務 (2)', english: 'presence', kk: '[ˈprɛzəns]', partOfSpeech: 'n.', chinese: '出席；存在感', exampleSentence: 'His presence at the meeting was crucial.', exampleSentenceChinese: '他出席會議至關重要。' },
+                { id: '18', category: '一般 商務 (2)', english: 'promote', kk: '[prəˈmoʊt]', partOfSpeech: 'v.', chinese: '促進；晉升', exampleSentence: 'The campaign aims to promote healthy eating.', exampleSentenceChinese: '該活動旨在推廣健康飲食。' },
+                { id: '19', category: '一般 商務 (2)', english: 'representative', kk: '[ˌrɛprɪˈzɛntətɪv]', partOfSpeech: 'n./adj.', chinese: '代表；典型的', exampleSentence: 'A sales representative will visit your office.', exampleSentenceChinese: '一位銷售代表將拜訪您的辦公室。' },
+                { id: '20', category: '一般 商務 (2)', english: 'salesperson', kk: '[ˈselzˌpɜrsən]', partOfSpeech: 'n.', chinese: '銷售員', exampleSentence: 'The salesperson was very helpful and knowledgeable.', exampleSentenceChinese: '那位銷售員非常樂於助人且知識淵博。' },
+                { id: '21', category: '一般 商務 (2)', english: 'seal', kk: '[sil]', partOfSpeech: 'n./v.', chinese: '印章；密封', exampleSentence: 'Please seal the envelope before mailing it.', exampleSentenceChinese: '郵寄前請密封信封。' },
+                { id: '22', category: '一般 商務 (2)', english: 'sponsor', kk: '[ˈspɑnsər]', partOfSpeech: 'n./v.', chinese: '贊助商；贊助', exampleSentence: 'The event is sponsored by several local businesses.', exampleSentenceChinese: '該活動由幾家當地企業贊助。' },
+                { id: '23', category: '一般 商務 (2)', english: 'suggestion', kk: '[səgˈdʒɛstʃən]', partOfSpeech: 'n.', chinese: '建議', exampleSentence: 'Do you have any suggestions for improvement?', exampleSentenceChinese: '您對改進有任何建議嗎？' },
+                { id: '24', category: '一般 商務 (2)', english: 'target', kk: '[ˈtɑrgɪt]', partOfSpeech: 'n./v.', chinese: '目標；把...作為目標', exampleSentence: 'Our target audience is young adults.', exampleSentenceChinese: '我們的目標受眾是年輕人。' },
+                { id: '25', category: '一般 商務 (2)', english: 'trend', kk: '[trɛnd]', partOfSpeech: 'n./v.', chinese: '趨勢；傾向', exampleSentence: 'There is a growing trend towards online shopping.', exampleSentenceChinese: '網路購物的趨勢日益增長。' }
+            ],
+            unit3: [
+                { id: '1', category: '一般 商務 (3)', english: 'agenda', kk: '[əˈdʒɛndə]', partOfSpeech: 'n.', chinese: '議程', exampleSentence: 'What is the first item on the agenda?', exampleSentenceChinese: '議程上的第一項是什麼？' },
+                { id: '2', category: '一般 商務 (3)', english: 'alternative', kk: '[ɔlˈtɜrnətɪv]', partOfSpeech: 'n./adj.', chinese: '替代方案；替代的', exampleSentence: 'We need to find an alternative solution to this problem.', exampleSentenceChinese: '我們需要找到這個問題的替代解決方案。' },
+                { id: '3', category: '一般 商務 (3)', english: 'boardroom', kk: '[ˈbɔrdˌrum]', partOfSpeech: 'n.', chinese: '會議室', exampleSentence: 'The meeting will be held in the boardroom.', exampleSentenceChinese: '會議將在會議室舉行。' },
+                { id: '4', category: '一般 商務 (3)', english: 'brochure', kk: '[broʊˈʃʊr]', partOfSpeech: 'n.', chinese: '小冊子', exampleSentence: 'Please take a look at our new product brochure.', exampleSentenceChinese: '請看一下我們的新產品手冊。' },
+                { id: '5', category: '一般 商務 (3)', english: 'client', kk: '[ˈklaɪənt]', partOfSpeech: 'n.', chinese: '客戶；委託人', exampleSentence: 'Our company values its clients greatly.', exampleSentenceChinese: '我們公司非常重視客戶。' },
+                { id: '6', category: '一般 商務 (3)', english: 'commission', kk: '[kəˈmɪʃən]', partOfSpeech: 'n./v.', chinese: '佣金；委託', exampleSentence: 'Salespeople often earn a commission on their sales.', exampleSentenceChinese: '銷售人員通常會從他們的銷售中賺取佣金。' },
+                { id: '7', category: '一般 商務 (3)', english: 'consensus', kk: '[kənˈsɛnsəs]', partOfSpeech: 'n.', chinese: '共識', exampleSentence: 'The committee reached a consensus on the issue.', exampleSentenceChinese: '委員會就此問題達成了共識。' },
+                { id: '8', category: '一般 商務 (3)', english: 'contract', kk: '[ˈkɑnˌtrækt]', partOfSpeech: 'n./v.', chinese: '合約；簽訂合約', exampleSentence: 'Both parties need to sign the contract.', exampleSentenceChinese: '雙方都需要簽署合約。' },
+                { id: '9', category: '一般 商務 (3)', english: 'corporate', kk: '[ˈkɔrpərɪt]', partOfSpeech: 'adj.', chinese: '公司的；法人的', exampleSentence: 'The company is planning a corporate restructuring.', exampleSentenceChinese: '該公司正計劃進行企業重組。' },
+                { id: '10', category: '一般 商務 (3)', english: 'discuss', kk: '[dɪˈskʌs]', partOfSpeech: 'v.', chinese: '討論', exampleSentence: 'Let\'s discuss the details of the project tomorrow.', exampleSentenceChinese: '我們明天討論專案的細節吧。' },
+                { id: '11', category: '一般 商務 (3)', english: 'exhibit', kk: '[ɪgˈzɪbɪt]', partOfSpeech: 'v./n.', chinese: '展示；展覽品', exampleSentence: 'The museum will exhibit paintings by local artists.', exampleSentenceChinese: '博物館將展出當地藝術家的畫作。' },
+                { id: '12', category: '一般 商務 (3)', english: 'finalize', kk: '[ˈfaɪnəˌlaɪz]', partOfSpeech: 'v.', chinese: '完成；敲定', exampleSentence: 'We need to finalize the plans for the event by Friday.', exampleSentenceChinese: '我們需要在周五前敲定活動計畫。' },
+                { id: '13', category: '一般 商務 (3)', english: 'handout', kk: '[ˈhændˌaʊt]', partOfSpeech: 'n.', chinese: '講義；傳單', exampleSentence: 'Please refer to page 5 of your handout.', exampleSentenceChinese: '請參閱講義的第5頁。' },
+                { id: '14', category: '一般 商務 (3)', english: 'leaflet', kk: '[ˈliflɪt]', partOfSpeech: 'n.', chinese: '傳單；單張印刷品', exampleSentence: 'They distributed leaflets about the new service.', exampleSentenceChinese: '他們分發了關於新服務的傳單。' },
+                { id: '15', category: '一般 商務 (3)', english: 'minutes', kk: '[ˈmɪnɪts]', partOfSpeech: 'n.', chinese: '會議記錄', exampleSentence: 'The secretary will take the minutes of the meeting.', exampleSentenceChinese: '秘書將負責會議記錄。' },
+                { id: '16', category: '一般 商務 (3)', english: 'pitch', kk: '[pɪtʃ]', partOfSpeech: 'n./v.', chinese: '提案；投球', exampleSentence: 'He made a convincing sales pitch to the client.', exampleSentenceChinese: '他向客戶做了一次有說服力的銷售提案。' },
+                { id: '17', category: '一般 商務 (3)', english: 'presentation', kk: '[ˌprizɛnˈteʃən]', partOfSpeech: 'n.', chinese: '簡報；呈現', exampleSentence: 'Her presentation on market trends was excellent.', exampleSentenceChinese: '她關於市場趨勢的簡報非常出色。' },
+                { id: '18', category: '一般 商務 (3)', english: 'proposal', kk: '[prəˈpoʊzəl]', partOfSpeech: 'n.', chinese: '提案；建議', exampleSentence: 'The committee is reviewing the research proposal.', exampleSentenceChinese: '委員會正在審查研究提案。' },
+                { id: '19', category: '一般 商務 (3)', english: 'reschedule', kk: '[ˌriˈskɛdʒʊl]', partOfSpeech: 'v.', chinese: '重新安排時間', exampleSentence: 'We had to reschedule the appointment.', exampleSentenceChinese: '我們不得不重新安排預約時間。' },
+                { id: '20', category: '一般 商務 (3)', english: 'sample', kk: '[ˈsæmpəl]', partOfSpeech: 'n./v.', chinese: '樣品；抽樣', exampleSentence: 'Would you like to try a free sample?', exampleSentenceChinese: '您想試用免費樣品嗎？' },
+                { id: '21', category: '一般 商務 (3)', english: 'seminar', kk: '[ˈsɛməˌnɑr]', partOfSpeech: 'n.', chinese: '研討會', exampleSentence: 'He attended a seminar on financial planning.', exampleSentenceChinese: '他參加了一個關於財務規劃的研討會。' },
+                { id: '22', category: '一般 商務 (3)', english: 'stall', kk: '[stɔl]', partOfSpeech: 'n./v.', chinese: '攤位；拖延', exampleSentence: 'They set up a stall at the trade fair.', exampleSentenceChinese: '他們在貿易展覽會上設立了一個攤位。' },
+                { id: '23', category: '一般 商務 (3)', english: 'summarize', kk: '[ˈsʌməˌraɪz]', partOfSpeech: 'v.', chinese: '總結；概述', exampleSentence: 'Can you summarize the main points of the report?', exampleSentenceChinese: '你能總結一下報告的要點嗎？' },
+                { id: '24', category: '一般 商務 (3)', english: 'terminate', kk: '[ˈtɜrməˌneɪt]', partOfSpeech: 'v.', chinese: '終止；結束', exampleSentence: 'The company decided to terminate the contract.', exampleSentenceChinese: '公司決定終止合約。' },
+                { id: '25', category: '一般 商務 (3)', english: 'workshop', kk: '[ˈwɜrkˌʃɑp]', partOfSpeech: 'n.', chinese: '工作坊；研討會', exampleSentence: 'She is leading a workshop on creative writing.', exampleSentenceChinese: '她正在主持一個關於創意寫作的工作坊。' }
+            ],
+            unit4: [ // 新增 Unit 4 製造業 (1) 單字
+                { id: '1', category: '製造業 (1)', english: 'assemble', kk: '[əˈsɛmbəl]', partOfSpeech: 'v.', chinese: '組裝；集合', exampleSentence: 'Workers assemble the cars on the production line.', exampleSentenceChinese: '工人們在生產線上組裝汽車。' },
+                { id: '2', category: '製造業 (1)', english: 'capacity', kk: '[kəˈpæsɪti]', partOfSpeech: 'n.', chinese: '容量；生產力', exampleSentence: 'The factory is operating at full capacity.', exampleSentenceChinese: '這家工廠正滿載生產。' },
+                { id: '3', category: '製造業 (1)', english: 'component', kk: '[kəmˈpoʊnənt]', partOfSpeech: 'n.', chinese: '零件；組成部分', exampleSentence: 'Each component is carefully checked before assembly.', exampleSentenceChinese: '每個零件在組裝前都經過仔細檢查。' },
+                { id: '4', category: '製造業 (1)', english: 'defect', kk: '[ˈdiːfɛkt]', partOfSpeech: 'n.', chinese: '缺陷；瑕疵', exampleSentence: 'The product was recalled due to a manufacturing defect.', exampleSentenceChinese: '該產品因製造缺陷而被召回。' },
+                { id: '5', category: '製造業 (1)', english: 'discontinue', kk: '[ˌdɪskənˈtɪnjuː]', partOfSpeech: 'v.', chinese: '停止；中止', exampleSentence: 'The company decided to discontinue the old model.', exampleSentenceChinese: '公司決定停產舊型號。' },
+                { id: '6', category: '製造業 (1)', english: 'fabric', kk: '[ˈfæbrɪk]', partOfSpeech: 'n.', chinese: '布料；織物', exampleSentence: 'This fabric is made from recycled materials.', exampleSentenceChinese: '這種布料是由回收材料製成的。' },
+                { id: '7', category: '製造業 (1)', english: 'gear', kk: '[ɡɪər]', partOfSpeech: 'n./v.', chinese: '齒輪；裝備；調整', exampleSentence: 'The machine has several gears for different speeds.', exampleSentenceChinese: '這台機器有幾個不同速度的齒輪。' },
+                { id: '8', category: '製造業 (1)', english: 'handcrafted', kk: '[ˈhændˌkræftɪd]', partOfSpeech: 'adj.', chinese: '手工製作的', exampleSentence: 'Each piece of jewelry is handcrafted with care.', exampleSentenceChinese: '每件珠寶都是精心手工製作的。' },
+                { id: '9', category: '製造業 (1)', english: 'insulation', kk: '[ˌɪnsəˈleɪʃən]', partOfSpeech: 'n.', chinese: '絕緣；隔熱材料', exampleSentence: 'Good insulation can reduce energy costs.', exampleSentenceChinese: '良好的絕緣可以降低能源成本。' },
+                { id: '10', category: '製造業 (1)', english: 'labor', kk: '[ˈleɪbər]', partOfSpeech: 'n./v.', chinese: '勞動；勞工', exampleSentence: 'The factory relies on skilled labor.', exampleSentenceChinese: '這家工廠依賴熟練勞工。' },
+                { id: '11', category: '製造業 (1)', english: 'machinery', kk: '[məˈʃiːnəri]', partOfSpeech: 'n.', chinese: '機械；機器', exampleSentence: 'New machinery was installed to improve efficiency.', exampleSentenceChinese: '安裝了新機械以提高效率。' },
+                { id: '12', category: '製造業 (1)', english: 'malfunction', kk: '[ˌmælˈfʌŋkʃən]', partOfSpeech: 'n./v.', chinese: '故障；失靈', exampleSentence: 'The equipment malfunctioned during the test.', exampleSentenceChinese: '設備在測試期間發生故障。' },
+                { id: '13', category: '製造業 (1)', english: 'manufacture', kk: '[ˌmænjəˈfæktʃər]', partOfSpeech: 'n./v.', chinese: '製造；生產；製造業', exampleSentence: 'The company manufactures electronic devices.', exampleSentenceChinese: '這家公司製造電子設備。' },
+                { id: '14', category: '製造業 (1)', english: 'material', kk: '[məˈtɪriəl]', partOfSpeech: 'n./adj.', chinese: '材料；原料；物質的', exampleSentence: 'The product is made from durable material.', exampleSentenceChinese: '該產品由耐用材料製成。' },
+                { id: '15', category: '製造業 (1)', english: 'merchandise', kk: '[ˈmɜːrtʃənˌdaɪz]', partOfSpeech: 'n./v.', chinese: '商品；貨物；買賣', exampleSentence: 'The store sells a variety of merchandise.', exampleSentenceChinese: '這家商店出售各種商品。' },
+                { id: '16', category: '製造業 (1)', english: 'operate', kk: '[ˈɑːpəreɪt]', partOfSpeech: 'v.', chinese: '操作；運作', exampleSentence: 'He knows how to operate heavy machinery.', exampleSentenceChinese: '他知道如何操作重型機械。' },
+                { id: '17', category: '製造業 (1)', english: 'plant', kk: '[plænt]', partOfSpeech: 'n./v.', chinese: '工廠；植物；種植', exampleSentence: 'The new car plant will create many jobs.', exampleSentenceChinese: '新的汽車工廠將創造許多就業機會。' },
+                { id: '18', category: '製造業 (1)', english: 'proceed', kk: '[prəˈsiːd]', partOfSpeech: 'v.', chinese: '繼續進行；著手', exampleSentence: 'We can now proceed with the next step.', exampleSentenceChinese: '我們現在可以繼續下一步了。' },
+                { id: '19', category: '製造業 (1)', english: 'protection', kk: '[prəˈtɛkʃən]', partOfSpeech: 'n.', chinese: '保護；防護', exampleSentence: 'Safety glasses provide eye protection.', exampleSentenceChinese: '安全眼鏡提供眼睛保護。' },
+                { id: '20', category: '製造業 (1)', english: 'quantity', kk: '[ˈkwɑːntɪti]', partOfSpeech: 'n.', chinese: '數量', exampleSentence: 'We need a large quantity of raw materials.', exampleSentenceChinese: '我們需要大量的原材料。' },
+                { id: '21', category: '製造業 (1)', english: 'recall', kk: '[rɪˈkɔːl]', partOfSpeech: 'v./n.', chinese: '召回；回憶', exampleSentence: 'The company issued a recall for the faulty products.', exampleSentenceChinese: '該公司發布了對有缺陷產品的召回。' },
+                { id: '22', category: '製造業 (1)', english: 'scrap', kk: '[skræp]', partOfSpeech: 'n./v.', chinese: '廢料；碎片；廢棄', exampleSentence: 'Metal scrap can be recycled.', exampleSentenceChinese: '金屬廢料可以回收利用。' },
+                { id: '23', category: '製造業 (1)', english: 'specification', kk: '[ˌspɛsɪfɪˈkeɪʃən]', partOfSpeech: 'n.', chinese: '規格；詳細說明', exampleSentence: 'The product meets all the required specifications.', exampleSentenceChinese: '該產品符合所有要求的規格。' },
+                { id: '24', category: '製造業 (1)', english: 'technique', kk: '[tɛkˈniːk]', partOfSpeech: 'n.', chinese: '技術；技巧', exampleSentence: 'He demonstrated a new painting technique.', exampleSentenceChinese: '他展示了一種新的繪畫技巧。' },
+                { id: '25', category: '製造業 (1)', english: 'tool', kk: '[tuːl]', partOfSpeech: 'n./v.', chinese: '工具；用工具加工', exampleSentence: 'A hammer is a basic tool for carpentry.', exampleSentenceChinese: '錘子是木工的基本工具。' }
+            ],
+            unit5: [ // 新增 Unit 5 製造業 (2) 單字
+                { id: '1', category: '製造業 (2)', english: 'automated', kk: '[ˈɔːtəˌmeɪtɪd]', partOfSpeech: 'adj.', chinese: '自動化的', exampleSentence: 'The factory uses automated systems for production.', exampleSentenceChinese: '這家工廠使用自動化系統進行生產。' },
+                { id: '2', category: '製造業 (2)', english: 'commodity', kk: '[kəˈmɑːdəti]', partOfSpeech: 'n.', chinese: '商品；日用品', exampleSentence: 'Oil is a valuable commodity.', exampleSentenceChinese: '石油是一種有價值的商品。' },
+                { id: '3', category: '製造業 (2)', english: 'customize', kk: '[ˈkʌstəˌmaɪz]', partOfSpeech: 'v.', chinese: '客製化；訂製', exampleSentence: 'Customers can customize their car\'s interior.', exampleSentenceChinese: '顧客可以客製化他們汽車的內裝。' },
+                { id: '4', category: '製造業 (2)', english: 'destroy', kk: '[dɪˈstrɔɪ]', partOfSpeech: 'v.', chinese: '破壞；毀壞', exampleSentence: 'The fire destroyed the old building.', exampleSentenceChinese: '大火燒毀了那棟舊建築。' },
+                { id: '5', category: '製造業 (2)', english: 'equip', kk: '[ɪˈkwɪp]', partOfSpeech: 'v.', chinese: '裝備；配備', exampleSentence: 'The laboratory is equipped with modern instruments.', exampleSentenceChinese: '實驗室配備了現代儀器。' },
+                { id: '6', category: '製造業 (2)', english: 'flaw', kk: '[flɔː]', partOfSpeech: 'n.', chinese: '缺陷；瑕疵', exampleSentence: 'There was a minor flaw in the design.', exampleSentenceChinese: '設計上存在一個小缺陷。' },
+                { id: '7', category: '製造業 (2)', english: 'goods', kk: '[ɡʊdz]', partOfSpeech: 'n.', chinese: '商品；貨物', exampleSentence: 'The ship transports various goods across the ocean.', exampleSentenceChinese: '這艘船運載各種貨物橫渡海洋。' },
+                { id: '8', category: '製造業 (2)', english: 'high-quality', kk: '[ˈhaɪˌkwɑːləti]', partOfSpeech: 'adj.', chinese: '高品質的', exampleSentence: 'We only use high-quality materials.', exampleSentenceChinese: '我們只使用高品質的材料。' },
+                { id: '9', category: '製造業 (2)', english: 'inventory', kk: '[ˈɪnvənˌtɔːri]', partOfSpeech: 'n.', chinese: '庫存；存貨清單', exampleSentence: 'The store keeps a detailed inventory of its products.', exampleSentenceChinese: '這家商店保存著其產品的詳細庫存清單。' },
+                { id: '10', category: '製造業 (2)', english: 'load', kk: '[loʊd]', partOfSpeech: 'v./n.', chinese: '裝載；負載', exampleSentence: 'Workers are loading boxes onto the truck.', exampleSentenceChinese: '工人們正在將箱子裝載到卡車上。' },
+                { id: '11', category: '製造業 (2)', english: 'maintain', kk: '[meɪnˈteɪn]', partOfSpeech: 'v.', chinese: '維持；保養', exampleSentence: 'It\'s important to maintain your car regularly.', exampleSentenceChinese: '定期保養汽車很重要。' },
+                { id: '12', category: '製造業 (2)', english: 'manual', kk: '[ˈmænjuəl]', partOfSpeech: 'adj./n.', chinese: '手動的；手冊', exampleSentence: 'The machine can be operated in manual mode.', exampleSentenceChinese: '這台機器可以手動操作。' },
+                { id: '13', category: '製造業 (2)', english: 'massive', kk: '[ˈmæsɪv]', partOfSpeech: 'adj.', chinese: '巨大的；大量的', exampleSentence: 'The company made a massive investment in new technology.', exampleSentenceChinese: '該公司在新技術上進行了巨額投資。' },
+                { id: '14', category: '製造業 (2)', english: 'mechanic', kk: '[məˈkænɪk]', partOfSpeech: 'n.', chinese: '技工；機械師', exampleSentence: 'The mechanic repaired the engine.', exampleSentenceChinese: '機械師修理了引擎。' },
+                { id: '15', category: '製造業 (2)', english: 'metal', kk: '[ˈmɛtl]', partOfSpeech: 'n./adj.', chinese: '金屬；金屬的', exampleSentence: 'Steel is a strong metal.', exampleSentenceChinese: '鋼是一種堅固的金屬。' },
+                { id: '16', category: '製造業 (2)', english: 'output', kk: '[ˈaʊtˌpʊt]', partOfSpeech: 'n./v.', chinese: '產量；輸出', exampleSentence: 'The factory increased its output by 10%.', exampleSentenceChinese: '這家工廠將產量提高了10%。' },
+                { id: '17', category: '製造業 (2)', english: 'plastic', kk: '[ˈplæstɪk]', partOfSpeech: 'n./adj.', chinese: '塑膠；塑膠的', exampleSentence: 'Many toys are made of plastic.', exampleSentenceChinese: '許多玩具都是塑膠製成的。' },
+                { id: '18', category: '製造業 (2)', english: 'produce', kk: '[prəˈduːs]', partOfSpeech: 'v.', chinese: '生產；製造', exampleSentence: 'This farm produces organic vegetables.', exampleSentenceChinese: '這個農場生產有機蔬菜。' },
+                { id: '19', category: '製造業 (2)', english: 'quality', kk: '[ˈkwɑːləti]', partOfSpeech: 'n./adj.', chinese: '品質；優質的', exampleSentence: 'We aim for high quality in all our products.', exampleSentenceChinese: '我們所有產品都以高品質為目標。' },
+                { id: '20', category: '製造業 (2)', english: 'random', kk: '[ˈrændəm]', partOfSpeech: 'adj.', chinese: '隨機的；任意的', exampleSentence: 'The words are chosen in a random order.', exampleSentenceChinese: '這些單字是隨機選擇的。' },
+                { id: '21', category: '製造業 (2)', english: 'replace', kk: '[rɪˈpleɪs]', partOfSpeech: 'v.', chinese: '替換；取代', exampleSentence: 'We need to replace the old equipment.', exampleSentenceChinese: '我們需要更換舊設備。' },
+                { id: '22', category: '製造業 (2)', english: 'shift', kk: '[ʃɪft]', partOfSpeech: 'n./v.', chinese: '輪班；轉移', exampleSentence: 'He works the night shift at the factory.', exampleSentenceChinese: '他在工廠上夜班。' },
+                { id: '23', category: '製造業 (2)', english: 'storage', kk: '[ˈstɔːrɪdʒ]', partOfSpeech: 'n.', chinese: '儲存；儲藏室', exampleSentence: 'The warehouse provides ample storage space.', exampleSentenceChinese: '倉庫提供充足的儲存空間。' },
+                { id: '24', category: '製造業 (2)', english: 'template', kk: '[ˈtɛmplɪt]', partOfSpeech: 'n.', chinese: '模板；樣板', exampleSentence: 'Use this template to create your presentation.', exampleSentenceChinese: '使用此模板來建立您的簡報。' },
+                { id: '25', category: '製造業 (2)', english: 'warehouse', kk: '[ˈwɛərˌhaʊs]', partOfSpeech: 'n.', chinese: '倉庫', exampleSentence: 'The goods are stored in a large warehouse.', exampleSentenceChinese: '貨物儲存在一個大倉庫裡。' }
+            ],
+            unit6: [ // 新增 Unit 6 金融 / 預算 / 經濟 (1) 單字
+                { id: '1', category: '金融 / 預算 / 經濟 (1)', english: 'account', kk: '[əˈkaʊnt]', partOfSpeech: 'n./v.', chinese: '帳戶；說明', exampleSentence: 'I need to check my bank account balance.', exampleSentenceChinese: '我需要查詢我的銀行帳戶餘額。' },
+                { id: '2', category: '金融 / 預算 / 經濟 (1)', english: 'add', kk: '[æd]', partOfSpeech: 'v.', chinese: '增加；加上', exampleSentence: 'Please add these numbers together.', exampleSentenceChinese: '請把這些數字加起來。' },
+                { id: '3', category: '金融 / 預算 / 經濟 (1)', english: 'ailing', kk: '[ˈeɪlɪŋ]', partOfSpeech: 'adj.', chinese: '生病的；不景氣的', exampleSentence: 'The government is trying to help the ailing economy.', exampleSentenceChinese: '政府正試圖幫助不景氣的經濟。' },
+                { id: '4', category: '金融 / 預算 / 經濟 (1)', english: 'balance', kk: '[ˈbæləns]', partOfSpeech: 'n./v.', chinese: '餘額；平衡', exampleSentence: 'What is the current balance in your account?', exampleSentenceChinese: '你帳戶目前的餘額是多少？' },
+                { id: '5', category: '金融 / 預算 / 經濟 (1)', english: 'bounce', kk: '[baʊns]', partOfSpeech: 'v./n.', chinese: '彈跳；退回（支票）', exampleSentence: 'The ball bounced off the wall.', exampleSentenceChinese: '球從牆上彈開。' },
+                { id: '6', category: '金融 / 預算 / 經濟 (1)', english: 'cash', kk: '[kæʃ]', partOfSpeech: 'n./v.', chinese: '現金；兌現', exampleSentence: 'I prefer to pay in cash.', exampleSentenceChinese: '我喜歡用現金支付。' },
+                { id: '7', category: '金融 / 預算 / 經濟 (1)', english: 'cost', kk: '[kɔːst]', partOfSpeech: 'n./v.', chinese: '成本；花費', exampleSentence: 'The total cost of the project was high.', exampleSentenceChinese: '這個專案的總成本很高。' },
+                { id: '8', category: '金融 / 預算 / 經濟 (1)', english: 'credit line', kk: '[ˈkrɛdɪt laɪn]', partOfSpeech: 'n.', chinese: '信用額度', exampleSentence: 'The bank approved a new credit line for the business.', exampleSentenceChinese: '銀行批准了這家企業新的信用額度。' },
+                { id: '9', category: '金融 / 預算 / 經濟 (1)', english: 'debit card', kk: '[ˈdɛbɪt kɑːrd]', partOfSpeech: 'n.', chinese: '簽帳金融卡', exampleSentence: 'You can pay with a debit card or credit card.', exampleSentenceChinese: '你可以用簽帳金融卡或信用卡支付。' },
+                { id: '10', category: '金融 / 預算 / 經濟 (1)', english: 'deposit', kk: '[dɪˈpɑːzɪt]', partOfSpeech: 'n./v.', chinese: '存款；押金；存放', exampleSentence: 'I need to make a deposit at the bank.', exampleSentenceChinese: '我需要到銀行存款。' },
+                { id: '11', category: '金融 / 預算 / 經濟 (1)', english: 'estimate', kk: '[ˈɛstɪmət]', partOfSpeech: 'n./v.', chinese: '估計；估價', exampleSentence: 'Can you give me an estimate for the repair work?', exampleSentenceChinese: '你能給我一個維修工作的估價嗎？' },
+                { id: '12', category: '金融 / 預算 / 經濟 (1)', english: 'fiscal', kk: '[ˈfɪskəl]', partOfSpeech: 'adj.', chinese: '財政的；會計的', exampleSentence: 'The government announced its new fiscal policy.', exampleSentenceChinese: '政府宣布了新的財政政策。' },
+                { id: '13', category: '金融 / 預算 / 經濟 (1)', english: 'investment', kk: '[ɪnˈvɛstmənt]', partOfSpeech: 'n.', chinese: '投資', exampleSentence: 'His investment in real estate paid off.', exampleSentenceChinese: '他對房地產的投資得到了回報。' },
+                { id: '14', category: '金融 / 預算 / 經濟 (1)', english: 'loss', kk: '[lɔːs]', partOfSpeech: 'n.', chinese: '損失；虧損', exampleSentence: 'The company reported a significant loss this quarter.', exampleSentenceChinese: '該公司本季度報告了重大虧損。' },
+                { id: '15', category: '金融 / 預算 / 經濟 (1)', english: 'owe', kk: '[oʊ]', partOfSpeech: 'v.', chinese: '欠；歸功於', exampleSentence: 'I owe him $50.', exampleSentenceChinese: '我欠他50美元。' },
+                { id: '16', category: '金融 / 預算 / 經濟 (1)', english: 'plummet', kk: '[ˈplʌmɪt]', partOfSpeech: 'v.', chinese: '暴跌；驟降', exampleSentence: 'Stock prices plummeted after the news.', exampleSentenceChinese: '消息傳出後，股價暴跌。' },
+                { id: '17', category: '金融 / 預算 / 經濟 (1)', english: 'projection', kk: '[prəˈdʒɛkʃən]', partOfSpeech: 'n.', chinese: '預測；投射', exampleSentence: 'Sales projections for next year are positive.', exampleSentenceChinese: '明年銷售預測是正向的。' },
+                { id: '18', category: '金融 / 預算 / 經濟 (1)', english: 'rate', kk: '[reɪt]', partOfSpeech: 'n./v.', chinese: '比率；費率；評價', exampleSentence: 'What is the interest rate on this loan?', exampleSentenceChinese: '這筆貸款的利率是多少？' },
+                { id: '19', category: '金融 / 預算 / 經濟 (1)', english: 'recovery', kk: '[rɪˈkʌvəri]', partOfSpeech: 'n.', chinese: '恢復；復甦', exampleSentence: 'The economy is showing signs of recovery.', exampleSentenceChinese: '經濟正顯示出復甦的跡象。' },
+                { id: '20', category: '金融 / 預算 / 經濟 (1)', english: 'save', kk: '[seɪv]', partOfSpeech: 'v.', chinese: '儲存；節省；拯救', exampleSentence: 'I need to save money for a new car.', exampleSentenceChinese: '我需要存錢買一輛新車。' },
+                { id: '21', category: '金融 / 預算 / 經濟 (1)', english: 'stockholder', kk: '[ˈstɑːkˌhoʊldər]', partOfSpeech: 'n.', chinese: '股東', exampleSentence: 'The stockholders will vote on the new proposal.', exampleSentenceChinese: '股東們將對新提案進行投票。' },
+                { id: '22', category: '金融 / 預算 / 經濟 (1)', english: 'tax', kk: '[tæks]', partOfSpeech: 'n./v.', chinese: '稅；課稅', exampleSentence: 'You have to pay income tax every year.', exampleSentenceChinese: '你每年都必須繳納所得稅。' },
+                { id: '23', category: '金融 / 預算 / 經濟 (1)', english: 'total', kk: '[ˈtoʊtl]', partOfSpeech: 'n./adj./v.', chinese: '總數；總計的；總計', exampleSentence: 'What is the total amount due?', exampleSentenceChinese: '應付總金額是多少？' },
+                { id: '24', category: '金融 / 預算 / 經濟 (1)', english: 'value', kk: '[ˈvæljuː]', partOfSpeech: 'n./v.', chinese: '價值；重視', exampleSentence: 'The antique vase has great value.', exampleSentenceChinese: '這個古董花瓶價值很高。' },
+                { id: '25', category: '金融 / 預算 / 經濟 (1)', english: 'worth', kk: '[wɜːrθ]', partOfSpeech: 'adj./n.', chinese: '值得的；價值', exampleSentence: 'The painting is worth a lot of money.', exampleSentenceChinese: '這幅畫價值很多錢。' }
+            ],
+            unit7: [ // 新增 Unit 7 金融 / 預算 / 經濟 (2) 單字
+                { id: '1', category: '金融 / 預算 / 經濟 (2)', english: 'accrue', kk: '[əˈkruː]', partOfSpeech: 'v.', chinese: '累積；增長', exampleSentence: 'Interest will accrue on the savings account.', exampleSentenceChinese: '儲蓄帳戶將會產生利息。' },
+                { id: '2', category: '金融 / 預算 / 經濟 (2)', english: 'advisor', kk: '[ədˈvaɪzər]', partOfSpeech: 'n.', chinese: '顧問', exampleSentence: 'She consulted a financial advisor about her investments.', exampleSentenceChinese: '她就她的投資諮詢了一位財務顧問。' },
+                { id: '3', category: '金融 / 預算 / 經濟 (2)', english: 'asset', kk: '[ˈæsɛt]', partOfSpeech: 'n.', chinese: '資產', exampleSentence: 'His biggest asset is his experience.', exampleSentenceChinese: '他最大的資產是他的經驗。' },
+                { id: '4', category: '金融 / 預算 / 經濟 (2)', english: 'bankrupt', kk: '[ˈbæŋkrʌpt]', partOfSpeech: 'adj./v.', chinese: '破產的；使破產', exampleSentence: 'The company went bankrupt after years of losses.', exampleSentenceChinese: '這家公司在多年虧損後破產了。' },
+                { id: '5', category: '金融 / 預算 / 經濟 (2)', english: 'banking', kk: '[ˈbæŋkɪŋ]', partOfSpeech: 'n.', chinese: '銀行業；金融業', exampleSentence: 'Online banking has become very popular.', exampleSentenceChinese: '網路銀行變得非常受歡迎。' },
+                { id: '6', category: '金融 / 預算 / 經濟 (2)', english: 'charge', kk: '[tʃɑːrdʒ]', partOfSpeech: 'n./v.', chinese: '費用；控告；充電', exampleSentence: 'There is no extra charge for delivery.', exampleSentenceChinese: '送貨沒有額外費用。' },
+                { id: '7', category: '預算 / 經濟 (2)', english: 'credit', kk: '[ˈkrɛdɪt]', partOfSpeech: 'n./v.', chinese: '信用；貸記；稱讚', exampleSentence: 'He paid for the car on credit.', exampleSentenceChinese: '他用賒帳的方式買了這輛車。' },
+                { id: '8', category: '金融 / 預算 / 經濟 (2)', english: 'correction', kk: '[kəˈrɛkʃən]', partOfSpeech: 'n.', chinese: '修正；改正', exampleSentence: 'Please make the necessary corrections to the report.', exampleSentenceChinese: '請對報告進行必要的修正。' },
+                { id: '9', category: '金融 / 預算 / 經濟 (2)', english: 'debt', kk: '[dɛt]', partOfSpeech: 'n.', chinese: '債務', exampleSentence: 'The company is trying to reduce its debt.', exampleSentenceChinese: '這家公司正試圖減少其債務。' },
+                { id: '10', category: '金融 / 預算 / 經濟 (2)', english: 'economy', kk: '[ɪˈkɑːnəmi]', partOfSpeech: 'n.', chinese: '經濟', exampleSentence: 'The global economy is facing challenges.', exampleSentenceChinese: '全球經濟正麵臨挑戰。' },
+                { id: '11', category: '金融 / 預算 / 經濟 (2)', english: 'financial', kk: '[faɪˈnænʃəl]', partOfSpeech: 'adj.', chinese: '財務的；金融的', exampleSentence: 'She has a strong financial background.', exampleSentenceChinese: '她有很強的財務背景。' },
+                { id: '12', category: '金融 / 預算 / 經濟 (2)', english: 'inflation', kk: '[ɪnˈfleɪʃən]', partOfSpeech: 'n.', chinese: '通貨膨脹', exampleSentence: 'Inflation is causing prices to rise.', exampleSentenceChinese: '通貨膨脹導致物價上漲。' },
+                { id: '13', category: '金融 / 預算 / 經濟 (2)', english: 'loan', kk: '[loʊn]', partOfSpeech: 'n./v.', chinese: '貸款；借出', exampleSentence: 'He took out a loan to buy a new house.', exampleSentenceChinese: '他申請貸款買了一棟新房子。' },
+                { id: '14', category: '金融 / 預算 / 經濟 (2)', english: 'lucrative', kk: '[ˈluːkrətɪv]', partOfSpeech: 'adj.', chinese: '獲利豐厚的', exampleSentence: 'It was a very lucrative business venture.', exampleSentenceChinese: '這是一項非常獲利豐厚的商業投資。' },
+                { id: '15', category: '金融 / 預算 / 經濟 (2)', english: 'percentage', kk: '[pərˈsɛntɪdʒ]', partOfSpeech: 'n.', chinese: '百分比；比例', exampleSentence: 'A large percentage of students passed the exam.', exampleSentenceChinese: '很大比例的學生通過了考試。' },
+                { id: '16', category: '金融 / 預算 / 經濟 (2)', english: 'profit', kk: '[ˈprɑːfɪt]', partOfSpeech: 'n./v.', chinese: '利潤；獲利', exampleSentence: 'The company made a huge profit last year.', exampleSentenceChinese: '這家公司去年獲得了巨額利潤。' },
+                { id: '17', category: '金融 / 預算 / 經濟 (2)', english: 'prosperous', kk: '[ˈprɑːspərəs]', partOfSpeech: 'adj.', chinese: '繁榮的；成功的', exampleSentence: 'They live in a prosperous neighborhood.', exampleSentenceChinese: '他們住在一個繁榮的社區。' },
+                { id: '18', category: '金融 / 預算 / 經濟 (2)', english: 'recession', kk: '[rɪˈsɛʃən]', partOfSpeech: 'n.', chinese: '經濟衰退', exampleSentence: 'The country is trying to recover from a recession.', exampleSentenceChinese: '這個國家正試圖從經濟衰退中復甦。' },
+                { id: '19', category: '金融 / 預算 / 經濟 (2)', english: 'reduce', kk: '[rɪˈduːs]', partOfSpeech: 'v.', chinese: '減少；降低', exampleSentence: 'We need to reduce our expenses.', exampleSentenceChinese: '我們需要減少開支。' },
+                { id: '20', category: '金融 / 預算 / 經濟 (2)', english: 'share', kk: '[ʃɛər]', partOfSpeech: 'n./v.', chinese: '份額；股份；分享', exampleSentence: 'He bought shares in the company.', exampleSentenceChinese: '他購買了這家公司的股份。' },
+                { id: '21', category: '金融 / 預算 / 經濟 (2)', english: 'surplus', kk: '[ˈsɜːrpləs]', partOfSpeech: 'n./adj.', chinese: '盈餘；過剩的', exampleSentence: 'The company reported a budget surplus.', exampleSentenceChinese: '這家公司報告了預算盈餘。' },
+                { id: '22', category: '金融 / 預算 / 經濟 (2)', english: 'tight', kk: '[taɪt]', partOfSpeech: 'adj.', chinese: '緊的；拮据的', exampleSentence: 'We are on a tight budget this month.', exampleSentenceChinese: '我們這個月預算很拮据。' },
+                { id: '23', category: '金融 / 預算 / 經濟 (2)', english: 'transaction', kk: '[trænˈzækʃən]', partOfSpeech: 'n.', chinese: '交易', exampleSentence: 'All financial transactions are recorded.', exampleSentenceChinese: '所有金融交易都有記錄。' },
+                { id: '24', category: '金融 / 預算 / 經濟 (2)', english: 'withdraw', kk: '[wɪðˈdrɔː]', partOfSpeech: 'v.', chinese: '提款；撤回', exampleSentence: 'I need to withdraw some cash from the ATM.', exampleSentenceChinese: '我需要從提款機提一些現金。' },
+                { id: '25', category: '金融 / 預算 / 經濟 (2)', english: 'yield', kk: '[jiːld]', partOfSpeech: 'n./v.', chinese: '產量；收益；產生', exampleSentence: 'The investment yielded a high return.', exampleSentenceChinese: '這項投資產生了很高的回報。' }
+            ],
+            unit8: [ // 新增 Unit 8 辦公室 (1) 單字
+                { id: '1', category: '辦公室 (1)', english: 'access', kk: '[ˈæksɛs]', partOfSpeech: 'n./v.', chinese: '使用權；進入；存取', exampleSentence: 'You need a password to access the system.', exampleSentenceChinese: '你需要密碼才能進入系統。' },
+                { id: '2', category: '辦公室 (1)', english: 'acquaint', kk: '[əˈkweɪnt]', partOfSpeech: 'v.', chinese: '使熟悉；告知', exampleSentence: 'Please acquaint yourself with the new procedures.', exampleSentenceChinese: '請您熟悉新的程序。' },
+                { id: '3', category: '辦公室 (1)', english: 'archive', kk: '[ˈɑːrkaɪv]', partOfSpeech: 'n./v.', chinese: '檔案；檔案館；歸檔', exampleSentence: 'These documents are stored in the company archive.', exampleSentenceChinese: '這些文件儲存在公司檔案館中。' },
+                { id: '4', category: '辦公室 (1)', english: 'attach', kk: '[əˈtætʃ]', partOfSpeech: 'v.', chinese: '附加；繫上', exampleSentence: 'Please attach your resume to the email.', exampleSentenceChinese: '請將您的履歷附加到電子郵件中。' },
+                { id: '5', category: '辦公室 (1)', english: 'break', kk: '[breɪk]', partOfSpeech: 'n./v.', chinese: '休息；中斷；打破', exampleSentence: 'Let\'s take a short break.', exampleSentenceChinese: '我們休息一下吧。' },
+                { id: '6', category: '辦公室 (1)', english: 'bulletin board', kk: '[ˈbʊlɪtɪn bɔːrd]', partOfSpeech: 'n.', chinese: '佈告欄', exampleSentence: 'Check the bulletin board for announcements.', exampleSentenceChinese: '請查看佈告欄以獲取公告。' },
+                { id: '7', category: '辦公室 (1)', english: 'clerical', kk: '[ˈklɛrɪkəl]', partOfSpeech: 'adj.', chinese: '文書的；辦事員的', exampleSentence: 'She handles all the clerical duties in the office.', exampleSentenceChinese: '她處理辦公室裡所有的文書工作。' },
+                { id: '8', category: '辦公室 (1)', english: 'correspondence', kk: '[ˌkɔːrəˈspɑːndəns]', partOfSpeech: 'n.', chinese: '信件；通訊', exampleSentence: 'He handles all the official correspondence.', exampleSentenceChinese: '他處理所有官方信件。' },
+                { id: '9', category: '辦公室 (1)', english: 'cubicle', kk: '[ˈkjuːbɪkəl]', partOfSpeech: 'n.', chinese: '小隔間', exampleSentence: 'Each employee has their own cubicle.', exampleSentenceChinese: '每位員工都有自己的小隔間。' },
+                { id: '10', category: '辦公室 (1)', english: 'department', kk: '[dɪˈpɑːrtmənt]', partOfSpeech: 'n.', chinese: '部門', exampleSentence: 'She works in the marketing department.', exampleSentenceChinese: '她在行銷部門工作。' },
+                { id: '11', category: '辦公室 (1)', english: 'distribute', kk: '[dɪˈstrɪbjuːt]', partOfSpeech: 'v.', chinese: '分發；分配', exampleSentence: 'Please distribute these flyers to all staff.', exampleSentenceChinese: '請將這些傳單分發給所有員工。' },
+                { id: '12', category: '辦公室 (1)', english: 'duplication', kk: '[ˌduːplɪˈkeɪʃən]', partOfSpeech: 'n.', chinese: '複製；重複', exampleSentence: 'Avoid duplication of effort.', exampleSentenceChinese: '避免重複勞動。' },
+                { id: '13', category: '辦公室 (1)', english: 'errand', kk: '[ˈɛrənd]', partOfSpeech: 'n.', chinese: '差事；跑腿', exampleSentence: 'I need to run some errands this afternoon.', exampleSentenceChinese: '我今天下午需要辦些差事。' },
+                { id: '14', category: '辦公室 (1)', english: 'file', kk: '[faɪl]', partOfSpeech: 'n./v.', chinese: '檔案；文件夾；歸檔', exampleSentence: 'Please file these documents alphabetically.', exampleSentenceChinese: '請按字母順序歸檔這些文件。' },
+                { id: '15', category: '辦公室 (1)', english: 'forward', kk: '[ˈfɔːrwərd]', partOfSpeech: 'v./adv.', chinese: '轉發；向前', exampleSentence: 'Can you forward this email to him?', exampleSentenceChinese: '你能把這封電子郵件轉發給他嗎？' },
+                { id: '16', category: '辦公室 (1)', english: 'headquarters', kk: '[ˈhɛdˌkwɔːrtərz]', partOfSpeech: 'n.', chinese: '總部', exampleSentence: 'The company headquarters is in New York.', exampleSentenceChinese: '公司總部在紐約。' },
+                { id: '17', category: '辦公室 (1)', english: 'instruct', kk: '[ɪnˈstrʌkt]', partOfSpeech: 'v.', chinese: '指示；教導', exampleSentence: 'He instructed me to complete the task by Friday.', exampleSentenceChinese: '他指示我必須在週五前完成任務。' },
+                { id: '18', category: '辦公室 (1)', english: 'mail', kk: '[meɪl]', partOfSpeech: 'n./v.', chinese: '郵件；郵寄', exampleSentence: 'Did you check the mail today?', exampleSentenceChinese: '你今天檢查郵件了嗎？' },
+                { id: '19', category: '辦公室 (1)', english: 'morale', kk: '[məˈræl]', partOfSpeech: 'n.', chinese: '士氣；鬥志', exampleSentence: 'The team\'s morale is very high.', exampleSentenceChinese: '團隊的士氣非常高昂。' },
+                { id: '20', category: '辦公室 (1)', english: 'overtime', kk: '[ˈoʊvərˌtaɪm]', partOfSpeech: 'n./adv.', chinese: '加班；加班時間', exampleSentence: 'He often works overtime to finish projects.', exampleSentenceChinese: '他經常加班以完成專案。' },
+                { id: '21', category: '辦公室 (1)', english: 'photocopy', kk: '[ˈfoʊtoʊˌkɑːpi]', partOfSpeech: 'n./v.', chinese: '影印本；影印', exampleSentence: 'Can you make a photocopy of this document?', exampleSentenceChinese: '你能影印這份文件嗎？' },
+                { id: '22', category: '辦公室 (1)', english: 'reminder', kk: '[rɪˈmaɪndər]', partOfSpeech: 'n.', chinese: '提醒物；提示', exampleSentence: 'I set a reminder for the meeting.', exampleSentenceChinese: '我為會議設定了提醒。' },
+                { id: '23', category: '辦公室 (1)', english: 'senior', kk: '[ˈsiːnjər]', partOfSpeech: 'adj./n.', chinese: '資深的；年長的；上級', exampleSentence: 'She is a senior manager in the company.', exampleSentenceChinese: '她是公司裡的一位資深經理。' },
+                { id: '24', category: '辦公室 (1)', english: 'stationery', kk: '[ˈsteɪʃəˌnɛri]', partOfSpeech: 'n.', chinese: '文具', exampleSentence: 'We need to order more stationery for the office.', exampleSentenceChinese: '我們需要為辦公室訂購更多文具。' },
+                { id: '25', category: '辦公室 (1)', english: 'supervise', kk: '[ˈsuːpərˌvaɪz]', partOfSpeech: 'v.', chinese: '監督；管理', exampleSentence: 'He supervises a team of ten employees.', exampleSentenceChinese: '他監督一個由十名員工組成的團隊。' }
+            ],
+            unit9: [ // 新增 Unit 9 辦公室 (2) 單字
+                { id: '1', category: '辦公室 (2)', english: 'accommodate', kk: '[əˈkɑːməˌdeɪt]', partOfSpeech: 'v.', chinese: '容納；提供住宿', exampleSentence: 'The hotel can accommodate up to 200 guests.', exampleSentenceChinese: '這家飯店最多可容納200位客人。' },
+                { id: '2', category: '辦公室 (2)', english: 'administrative', kk: '[ədˈmɪnɪˌstreɪtɪv]', partOfSpeech: 'adj.', chinese: '行政的；管理的', exampleSentence: 'She handles all the administrative tasks.', exampleSentenceChinese: '她處理所有行政事務。' },
+                { id: '3', category: '辦公室 (2)', english: 'assignment', kk: '[əˈsaɪnmənt]', partOfSpeech: 'n.', chinese: '任務；作業', exampleSentence: 'He completed his assignment on time.', exampleSentenceChinese: '他按時完成了他的任務。' },
+                { id: '4', category: '辦公室 (2)', english: 'board', kk: '[bɔːrd]', partOfSpeech: 'n./v.', chinese: '委員會；董事會；板子；登機', exampleSentence: 'The board of directors meets monthly.', exampleSentenceChinese: '董事會每月開會。' },
+                { id: '5', category: '辦公室 (2)', english: 'briefcase', kk: '[ˈbriːfˌkeɪs]', partOfSpeech: 'n.', chinese: '公事包', exampleSentence: 'He carried a leather briefcase to the meeting.', exampleSentenceChinese: '他提著一個皮公事包去開會。' },
+                { id: '6', category: '辦公室 (2)', english: 'cartridge', kk: '[ˈkɑːrtrɪdʒ]', partOfSpeech: 'n.', chinese: '墨水匣；彈藥筒', exampleSentence: 'The printer needs a new ink cartridge.', exampleSentenceChinese: '印表機需要一個新的墨水匣。' },
+                { id: '7', category: '辦公室 (2)', english: 'committee', kk: '[kəˈmɪti]', partOfSpeech: 'n.', chinese: '委員會', exampleSentence: 'The committee will review the proposals.', exampleSentenceChinese: '委員會將審查這些提案。' },
+                { id: '8', category: '辦公室 (2)', english: 'corridor', kk: '[ˈkɔːrɪdɔːr]', partOfSpeech: 'n.', chinese: '走廊；通道', exampleSentence: 'The offices are located along the main corridor.', exampleSentenceChinese: '辦公室位於主走廊旁。' },
+                { id: '9', category: '辦公室 (2)', english: 'deadline', kk: '[ˈdɛdˌlaɪn]', partOfSpeech: 'n.', chinese: '截止日期', exampleSentence: 'The deadline for the project is Friday.', exampleSentenceChinese: '這個專案的截止日期是週五。' },
+                { id: '10', category: '辦公室 (2)', english: 'designate', kk: '[ˈdɛzɪɡˌneɪt]', partOfSpeech: 'v.', chinese: '指定；指派', exampleSentence: 'He was designated as the team leader.', exampleSentenceChinese: '他被指定為團隊領導。' },
+                { id: '11', category: '辦公室 (2)', english: 'division', kk: '[dɪˈvɪʒən]', partOfSpeech: 'n.', chinese: '部門；分歧', exampleSentence: 'She works in the sales division.', exampleSentenceChinese: '她在銷售部門工作。' },
+                { id: '12', category: '辦公室 (2)', english: 'enclose', kk: '[ɪnˈkloʊz]', partOfSpeech: 'v.', chinese: '圍住；附上', exampleSentence: 'Please enclose a copy of your passport.', exampleSentenceChinese: '請附上您的護照影本。' },
+                { id: '13', category: '辦公室 (2)', english: 'executive', kk: '[ɪɡˈzɛkjətɪv]', partOfSpeech: 'n./adj.', chinese: '主管；行政的', exampleSentence: 'He is a senior executive in the company.', exampleSentenceChinese: '他是公司裡的一位資深主管。' },
+                { id: '14', category: '辦公室 (2)', english: 'firm', kk: '[fɜːrm]', partOfSpeech: 'n./adj.', chinese: '公司；堅固的', exampleSentence: 'She works for a law firm.', exampleSentenceChinese: '她在一家律師事務所工作。' },
+                { id: '15', category: '辦公室 (2)', english: 'gossip', kk: '[ˈɡɑːsɪp]', partOfSpeech: 'n./v.', chinese: '八卦；閒聊', exampleSentence: 'Avoid spreading office gossip.', exampleSentenceChinese: '避免散播辦公室八卦。' },
+                { id: '16', category: '辦公室 (2)', english: 'inaugural', kk: '[ɪˈnɔːɡjərəl]', partOfSpeech: 'adj.', chinese: '首次的；就職的', exampleSentence: 'The inaugural flight was a great success.', exampleSentenceChinese: '首次飛行非常成功。' },
+                { id: '17', category: '辦公室 (2)', english: 'laptop', kk: '[ˈlæpˌtɑːp]', partOfSpeech: 'n.', chinese: '筆記型電腦', exampleSentence: 'He uses his laptop for work and study.', exampleSentenceChinese: '他用筆記型電腦工作和學習。' },
+                { id: '18', category: '辦公室 (2)', english: 'message', kk: '[ˈmɛsɪdʒ]', partOfSpeech: 'n.', chinese: '訊息；口信', exampleSentence: 'I left a message for him.', exampleSentenceChinese: '我給他留了個口信。' },
+                { id: '19', category: '辦公室 (2)', english: 'occupation', kk: '[ˌɑːkjuˈpeɪʃən]', partOfSpeech: 'n.', chinese: '職業；佔領', exampleSentence: 'Please state your name and occupation.', exampleSentenceChinese: '請說明您的姓名和職業。' },
+                { id: '20', category: '辦公室 (2)', english: 'paperwork', kk: '[ˈpeɪpərˌwɜːrk]', partOfSpeech: 'n.', chinese: '文書工作', exampleSentence: 'There\'s a lot of paperwork to do today.', exampleSentenceChinese: '今天有很多文書工作要做。' },
+                { id: '21', category: '辦公室 (2)', english: 'printer', kk: '[ˈprɪntər]', partOfSpeech: 'n.', chinese: '印表機', exampleSentence: 'The printer is out of ink.', exampleSentenceChinese: '印表機沒墨水了。' },
+                { id: '22', category: '辦公室 (2)', english: 'revise', kk: '[rɪˈvaɪz]', partOfSpeech: 'v.', chinese: '修改；修訂', exampleSentence: 'Please revise the report before submitting it.', exampleSentenceChinese: '請在提交報告前修改。' },
+                { id: '23', category: '辦公室 (2)', english: 'staff lounge', kk: '[stæf laʊndʒ]', partOfSpeech: 'n.', chinese: '員工休息室', exampleSentence: 'Employees can relax in the staff lounge during breaks.', exampleSentenceChinese: '員工可以在休息時間在員工休息室放鬆。' },
+                { id: '24', category: '辦公室 (2)', english: 'submit', kk: '[səbˈmɪt]', partOfSpeech: 'v.', chinese: '提交；呈遞', exampleSentence: 'Please submit your application by Friday.', exampleSentenceChinese: '請在週五前提交您的申請。' },
+                { id: '25', category: '辦公室 (2)', english: 'workload', kk: '[ˈwɜːrkˌloʊd]', partOfSpeech: 'n.', chinese: '工作量', exampleSentence: 'He has a heavy workload this week.', exampleSentenceChinese: '他這週的工作量很大。' }
+            ],
+            unit10: [ // 新增 Unit 10 辦公室 (3) 單字
+                { id: '1', category: '辦公室 (3)', english: 'acknowledge', kk: '[əkˈnɑːlɪdʒ]', partOfSpeech: 'v.', chinese: '承認；確認收到', exampleSentence: 'Please acknowledge receipt of this email.', exampleSentenceChinese: '請確認收到此電子郵件。' },
+                { id: '2', category: '辦公室 (3)', english: 'announcement', kk: '[əˈnaʊnsmənt]', partOfSpeech: 'n.', chinese: '公告；宣布', exampleSentence: 'The company made an important announcement today.', exampleSentenceChinese: '公司今天發布了一項重要公告。' },
+                { id: '3', category: '辦公室 (3)', english: 'assistant', kk: '[əˈsɪstənt]', partOfSpeech: 'n.', chinese: '助理；助手', exampleSentence: 'She works as a personal assistant to the CEO.', exampleSentenceChinese: '她擔任執行長個人助理。' },
+                { id: '4', category: '辦公室 (3)', english: 'branch', kk: '[bræntʃ]', partOfSpeech: 'n.', chinese: '分公司；樹枝', exampleSentence: 'The bank has several branches in the city.', exampleSentenceChinese: '這家銀行在市區有幾家分行。' },
+                { id: '5', category: '辦公室 (3)', english: 'browser', kk: '[ˈbraʊzər]', partOfSpeech: 'n.', chinese: '瀏覽器', exampleSentence: 'You need a web browser to access the internet.', exampleSentenceChinese: '你需要一個網頁瀏覽器才能上網。' },
+                { id: '6', category: '辦公室 (3)', english: 'classified', kk: '[ˈklæsɪˌfaɪd]', partOfSpeech: 'adj.', chinese: '機密的；分類的', exampleSentence: 'This information is highly classified.', exampleSentenceChinese: '這份資料是高度機密的。' },
+                { id: '7', category: '辦公室 (3)', english: 'compile', kk: '[kəmˈpaɪl]', partOfSpeech: 'v.', chinese: '編譯；收集', exampleSentence: 'He compiled a list of all the attendees.', exampleSentenceChinese: '他編制了一份所有與會者的名單。' },
+                { id: '8', category: '辦公室 (3)', english: 'council', kk: '[ˈkaʊnsəl]', partOfSpeech: 'n.', chinese: '委員會；理事會', exampleSentence: 'The city council approved the new budget.', exampleSentenceChinese: '市議會批准了新預算。' },
+                { id: '9', category: '辦公室 (3)', english: 'demanding', kk: '[dɪˈmændɪŋ]', partOfSpeech: 'adj.', chinese: '要求高的；費力的', exampleSentence: 'It\'s a demanding job that requires a lot of effort.', exampleSentenceChinese: '這是一份要求很高且需要大量努力的工作。' },
+                { id: '10', category: '辦公室 (3)', english: 'director', kk: '[dɪˈrɛktər]', partOfSpeech: 'n.', chinese: '主管；董事；導演', exampleSentence: 'She is the director of the human resources department.', exampleSentenceChinese: '她是人力資源部的主管。' },
+                { id: '11', category: '辦公室 (3)', english: 'document', kk: '[ˈdɑːkjumənt]', partOfSpeech: 'n./v.', chinese: '文件；記錄', exampleSentence: 'Please sign this document.', exampleSentenceChinese: '請簽署這份文件。' },
+                { id: '12', category: '辦公室 (3)', english: 'envelope', kk: '[ˈɛnvəˌloʊp]', partOfSpeech: 'n.', chinese: '信封', exampleSentence: 'Put the letter in the envelope and mail it.', exampleSentenceChinese: '把信放進信封裡寄出去。' },
+                { id: '13', category: '辦公室 (3)', english: 'facility', kk: '[fəˈsɪləti]', partOfSpeech: 'n.', chinese: '設施；場所', exampleSentence: 'The hotel has excellent sports facilities.', exampleSentenceChinese: '這家飯店有很棒的運動設施。' },
+                { id: '14', category: '辦公室 (3)', english: 'folder', kk: '[ˈfoʊldər]', partOfSpeech: 'n.', chinese: '文件夾；資料夾', exampleSentence: 'Save the file in the correct folder.', exampleSentenceChinese: '將檔案儲存到正確的資料夾。' },
+                { id: '15', category: '辦公室 (3)', english: 'harassment', kk: '[həˈræsmənt]', partOfSpeech: 'n.', chinese: '騷擾', exampleSentence: 'The company has a strict policy against harassment.', exampleSentenceChinese: '公司有嚴格的反騷擾政策。' },
+                { id: '16', category: '辦公室 (3)', english: 'install', kk: '[ɪnˈstɔːl]', partOfSpeech: 'v.', chinese: '安裝', exampleSentence: 'We need to install new software on the computers.', exampleSentenceChinese: '我們需要在電腦上安裝新軟體。' },
+                { id: '17', category: '辦公室 (3)', english: 'letterhead', kk: '[ˈlɛtərˌhɛd]', partOfSpeech: 'n.', chinese: '信頭', exampleSentence: 'The official letter was printed on company letterhead.', exampleSentenceChinese: '這封官方信件印在公司信頭紙上。' },
+                { id: '18', category: '辦公室 (3)', english: 'monitor', kk: '[ˈmɑːnɪtər]', partOfSpeech: 'n./v.', chinese: '螢幕；監控', exampleSentence: 'He spends hours staring at the computer monitor.', exampleSentenceChinese: '他花好幾個小時盯著電腦螢幕。' },
+                { id: '19', category: '辦公室 (3)', english: 'organize', kk: '[ˈɔːrɡəˌnaɪz]', partOfSpeech: 'v.', chinese: '組織；安排', exampleSentence: 'She helped to organize the conference.', exampleSentenceChinese: '她協助組織了這次會議。' },
+                { id: '20', category: '辦公室 (3)', english: 'password', kk: '[ˈpæsˌwɜːrd]', partOfSpeech: 'n.', chinese: '密碼', exampleSentence: 'Please choose a strong password for your account.', exampleSentenceChinese: '請為您的帳戶選擇一個強密碼。' },
+                { id: '21', category: '辦公室 (3)', english: 'procedure', kk: '[prəˈsiːdʒər]', partOfSpeech: 'n.', chinese: '程序；步驟', exampleSentence: 'Follow the correct procedure for filing a complaint.', exampleSentenceChinese: '請遵循正確的投訴程序。' },
+                { id: '22', category: '辦公室 (3)', english: 'routine', kk: '[ruːˈtiːn]', partOfSpeech: 'n./adj.', chinese: '例行公事；日常的', exampleSentence: 'He has a daily routine of exercise and meditation.', exampleSentenceChinese: '他每天都有運動和冥想的例行公事。' },
+                { id: '23', category: '辦公室 (3)', english: 'staple', kk: '[ˈsteɪpəl]', partOfSpeech: 'n./v.', chinese: '釘書針；主要產品；用釘書機釘', exampleSentence: 'Please use a staple to attach these papers.', exampleSentenceChinese: '請用釘書針將這些文件釘在一起。' },
+                { id: '24', category: '辦公室 (3)', english: 'subsidiary', kk: '[səbˈsɪdiˌɛri]', partOfSpeech: 'n./adj.', chinese: '子公司；附屬的', exampleSentence: 'The company has a subsidiary in Japan.', exampleSentenceChinese: '這家公司在日本有一家子公司。' },
+                { id: '25', category: '辦公室 (3)', english: 'workplace', kk: '[ˈwɜːrkˌpleɪs]', partOfSpeech: 'n.', chinese: '工作場所', exampleSentence: 'Safety is a top priority in the workplace.', exampleSentenceChinese: '安全是工作場所的首要任務。' }
+            ],
+        };
+
+        let currentGameMode = '';
+        let wordsForCurrentGame = [];
+        let currentWordIndex = 0;
+        let score = 0;
+        let selectedMatchItems = { english: null, chinese: null };
+        let totalWordsInRound = 0; // For match game, total pairs in current set
+
+        const MAX_QUESTIONS_PER_GAME = 25; 
+        const MATCH_GAME_WORDS_PER_ROUND = 4;
+
+
+        // DOM Elements
+        const gameArea = document.getElementById('gameArea');
+        const unitSelect = document.getElementById('unitSelect');
+
+        const studyArea = document.getElementById('studyArea');
+        const studyWordEnglishEl = document.getElementById('studyWordEnglish');
+        const studyWordDetailsEl = document.getElementById('studyWordDetails');
+        const studyPrevBtn = document.getElementById('studyPrevBtn');
+        const studyNextBtn = document.getElementById('studyNextBtn');
+
+        const quizArea = document.getElementById('quizArea');
+        const quizQuestionEl = document.getElementById('quizQuestion');
+        const quizOptionsEl = document.getElementById('quizOptions');
+        const quizFeedbackEl = document.getElementById('quizFeedback');
+        const quizNextBtn = document.getElementById('quizNextBtn');
+
+        const typingArea = document.getElementById('typingArea');
+        const typingQuestionEl = document.getElementById('typingQuestion');
+        const typingInputEl = document.getElementById('typingInput');
+        const typingFeedbackEl = document.getElementById('typingFeedback');
+        const typingNextBtn = document.getElementById('typingNextBtn');
+
+        const matchModeArea = document.getElementById('matchModeArea');
+        const englishWordsColumnEl = document.getElementById('englishWordsColumn');
+        const chineseWordsColumnEl = document.getElementById('chineseWordsColumn');
+        const matchFeedbackEl = document.getElementById('matchFeedback');
+        const matchNextBtn = document.getElementById('matchNextBtn');
+
+        const scoreDisplay = document.getElementById('score');
+        const currentQuestionDisplay = document.getElementById('currentQuestionDisplay');
+        const totalQuestionsDisplay = document.getElementById('totalQuestionsDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const alertMessageEl = document.getElementById('alertMessage');
+
+
+        function showAlert(message) {
+            alertMessageEl.textContent = message;
+            alertMessageEl.style.display = 'block';
+            setTimeout(() => {
+                alertMessageEl.style.display = 'none';
+            }, 3000);
+        }
+
+        function getSelectedUnitWords() {
+            const selectedUnit = unitSelect.value;
+            if (!selectedUnit || !vocabulary[selectedUnit]) {
+                showAlert('請先選擇一個有效的單元！');
+                return [];
+            }
+            return vocabulary[selectedUnit];
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function startGame(gameMode) {
+            currentGameMode = gameMode;
+            const allWordsFromUnit = getSelectedUnitWords();
+
+            if (allWordsFromUnit.length === 0) return;
+
+            wordsForCurrentGame = shuffleArray([...allWordsFromUnit]);
+            if (gameMode !== 'study' && wordsForCurrentGame.length > MAX_QUESTIONS_PER_GAME) {
+                 wordsForCurrentGame = wordsForCurrentGame.slice(0, MAX_QUESTIONS_PER_GAME);
+            }
+            
+            currentWordIndex = 0;
+            score = 0;
+            
+            scoreDisplay.textContent = score;
+            totalQuestionsDisplay.textContent = wordsForCurrentGame.length; // Default for study, quiz, typing
+            if (gameMode === 'match') { 
+                const numRounds = Math.ceil(wordsForCurrentGame.length / MATCH_GAME_WORDS_PER_ROUND);
+                totalQuestionsDisplay.textContent = numRounds; 
+
+                 if (wordsForCurrentGame.length < 2) { // Need at least 2 words to form a pair for matching
+                    showAlert('單字太少，無法開始配對遊戲。至少需要2個單字。');
+                    return;
+                }
+            }
+
+
+            gameArea.style.display = 'block';
+            document.querySelectorAll('.question-card, .study-card, #matchModeArea').forEach(area => area.style.display = 'none');
+            document.querySelector('.game-modes').style.display = 'none';
+            document.querySelector('.unit-selector').style.display = 'none';
+
+
+            updateProgress();
+            
+            if (gameMode === 'study') {
+                studyArea.style.display = 'block';
+                displayStudyWord();
+            } else if (gameMode === 'quiz') {
+                quizArea.style.display = 'block';
+                displayQuizQuestion();
+            } else if (gameMode === 'typing') {
+                typingArea.style.display = 'block';
+                displayTypingQuestion();
+            } else if (gameMode === 'match') {
+                matchModeArea.style.display = 'block';
+                displayMatchGame();
+            }
+        }
+        
+        function displayStudyWord() {
+            if (currentWordIndex >= wordsForCurrentGame.length) {
+                backToMenu(true); 
+                showAlert("已學完此單元所有單字。");
+                return;
+            }
+            const word = wordsForCurrentGame[currentWordIndex];
+            studyWordEnglishEl.textContent = word.english;
+            studyWordDetailsEl.innerHTML = `
+                <p><strong>KK 音標：</strong> ${word.kk}</p>
+                <p><strong>詞性：</strong> ${word.partOfSpeech}</p>
+                <p><strong>中文意思：：</strong> ${word.chinese}</p>
+                <p><strong>例句：</strong> ${word.exampleSentence}</p>
+                <p><strong>例句翻譯：</strong> ${word.exampleSentenceChinese}</p>
+                <p><strong>分類：</strong> ${word.category} (編號: ${word.id})</p>
+            `;
+            currentQuestionDisplay.textContent = currentWordIndex + 1; // Display 1-based index
+            studyPrevBtn.style.display = currentWordIndex > 0 ? 'inline-block' : 'none';
+            studyNextBtn.style.display = currentWordIndex < wordsForCurrentGame.length - 1 ? 'inline-block' : 'none';
+            updateProgress();
+        }
+
+        function navigateStudyWord(direction) {
+            currentWordIndex += direction;
+            displayStudyWord();
+        }
+
+
+        function displayQuizQuestion() {
+            if (currentWordIndex >= wordsForCurrentGame.length) {
+                showFinalScore();
+                return;
+            }
+            const word = wordsForCurrentGame[currentWordIndex];
+            quizQuestionEl.textContent = word.english;
+            
+            const allUnitWords = getSelectedUnitWords(); 
+            let wrongAnswerOptions = allUnitWords.filter(w => w.chinese !== word.chinese).map(w => w.chinese);
+            wrongAnswerOptions = shuffleArray([...new Set(wrongAnswerOptions)]).slice(0, 3); 
+            
+            while (wrongAnswerOptions.length < 3 && allUnitWords.length > wrongAnswerOptions.length + 1) {
+                // Attempt to fill with more unique options if available, otherwise it might be less than 3
+                const potentialDistractors = allUnitWords.filter(w => w.chinese !== word.chinese && !wrongAnswerOptions.includes(w.chinese));
+                if (potentialDistractors.length > 0) {
+                    wrongAnswerOptions.push(shuffleArray(potentialDistractors)[0].chinese);
+                    wrongAnswerOptions = [...new Set(wrongAnswerOptions)]; // Ensure uniqueness
+                } else {
+                    break; // No more unique distractors available
+                }
+            }
+            
+            const options = shuffleArray([word.chinese, ...wrongAnswerOptions.slice(0,3)]);
+
+            quizOptionsEl.innerHTML = '';
+            options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => checkQuizAnswer(option, word.chinese, btn);
+                quizOptionsEl.appendChild(btn);
+            });
+
+            quizFeedbackEl.textContent = '';
+            quizFeedbackEl.className = 'feedback-message';
+            quizNextBtn.style.display = 'none';
+            currentQuestionDisplay.textContent = currentWordIndex + 1;
+            updateProgress();
+        }
+
+        function checkQuizAnswer(selectedAnswer, correctAnswer, btnElement) {
+            document.querySelectorAll('#quizOptions .option-btn').forEach(btn => btn.disabled = true);
+            quizNextBtn.style.display = 'inline-block';
+
+            if (selectedAnswer === correctAnswer) {
+                btnElement.classList.add('correct');
+                quizFeedbackEl.textContent = '正確！太棒了！🎉';
+                quizFeedbackEl.className = 'feedback-message correct';
+                score++;
+            } else {
+                btnElement.classList.add('wrong');
+                quizFeedbackEl.textContent = `錯誤！正確答案是：${correctAnswer}`;
+                quizFeedbackEl.className = 'feedback-message wrong';
+                document.querySelectorAll('#quizOptions .option-btn').forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+            scoreDisplay.textContent = score;
+        }
+
+        function displayTypingQuestion() {
+            if (currentWordIndex >= wordsForCurrentGame.length) {
+                showFinalScore();
+                return;
+            }
+            const word = wordsForCurrentGame[currentWordIndex];
+            typingQuestionEl.textContent = `請輸入「${word.chinese}」的英文：`;
+            typingInputEl.value = '';
+            typingInputEl.disabled = false;
+            typingInputEl.focus();
+            
+            typingFeedbackEl.textContent = '';
+            typingFeedbackEl.className = 'feedback-message';
+            typingNextBtn.style.display = 'none';
+            currentQuestionDisplay.textContent = currentWordIndex + 1;
+
+            typingInputEl.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    checkTyping();
+                }
+            };
+            updateProgress();
+        }
+
+        function checkTyping() {
+            const userAnswer = typingInputEl.value.trim().toLowerCase();
+            const correctAnswer = wordsForCurrentGame[currentWordIndex].english.toLowerCase();
+            typingInputEl.disabled = true;
+            typingNextBtn.style.display = 'inline-block';
+
+            if (userAnswer === correctAnswer) {
+                typingFeedbackEl.textContent = '正確！很棒！🎉';
+                typingFeedbackEl.className = 'feedback-message correct';
+                score++;
+            } else {
+                typingFeedbackEl.textContent = `錯誤！正確答案是：${wordsForCurrentGame[currentWordIndex].english}`;
+                typingFeedbackEl.className = 'feedback-message wrong';
+            }
+            scoreDisplay.textContent = score;
+        }
+
+        function displayMatchGame() {
+            if (currentWordIndex >= wordsForCurrentGame.length || (wordsForCurrentGame.length - currentWordIndex) < 2 ) {
+                showFinalScore(); 
+                return;
+            }
+
+            const wordsForThisRound = wordsForCurrentGame.slice(currentWordIndex, currentWordIndex + MATCH_GAME_WORDS_PER_ROUND);
+             if (wordsForThisRound.length < 2 && currentWordIndex < wordsForCurrentGame.length) {
+                // Not enough for a full round, but there are words left.
+                // This case should ideally be handled by ensuring wordsForCurrentGame for match mode is a multiple of MATCH_GAME_WORDS_PER_ROUND
+                // or by having a final round with fewer than MATCH_GAME_WORDS_PER_ROUND if necessary.
+                // For now, if less than 2, we end.
+                showFinalScore();
+                return;
+            }
+            totalWordsInRound = wordsForThisRound.length; 
+
+            const englishItems = shuffleArray(wordsForThisRound.map(w => ({ text: w.english, id: w.id })));
+            const chineseItems = shuffleArray(wordsForThisRound.map(w => ({ text: w.chinese, id: w.id })));
+
+            englishWordsColumnEl.innerHTML = '';
+            chineseWordsColumnEl.innerHTML = '';
+
+            englishItems.forEach(item => createMatchItem(item, 'english', englishWordsColumnEl));
+            chineseItems.forEach(item => createMatchItem(item, 'chinese', chineseWordsColumnEl));
+
+            selectedMatchItems = { english: null, chinese: null };
+            matchFeedbackEl.textContent = '';
+            matchFeedbackEl.className = 'feedback-message';
+            matchNextBtn.style.display = 'none';
+            
+            const currentRoundNumber = Math.floor(currentWordIndex / MATCH_GAME_WORDS_PER_ROUND) + 1;
+            const totalRounds = Math.ceil(wordsForCurrentGame.length / MATCH_GAME_WORDS_PER_ROUND);
+            currentQuestionDisplay.textContent = currentRoundNumber;
+            totalQuestionsDisplay.textContent = totalRounds; 
+            updateProgress();
+        }
+        
+        function createMatchItem(itemData, type, columnElement) {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'match-item';
+            itemEl.textContent = itemData.text;
+            itemEl.dataset.id = itemData.id;
+            itemEl.dataset.type = type;
+            itemEl.onclick = () => handleMatchItemSelect(itemEl);
+            columnElement.appendChild(itemEl);
+        }
+
+        function handleMatchItemSelect(selectedElement) {
+            if (selectedElement.classList.contains('matched')) return;
+
+            const type = selectedElement.dataset.type;
+            
+            if (selectedMatchItems[type] === selectedElement) { 
+                selectedElement.classList.remove('selected');
+                selectedMatchItems[type] = null;
+                return;
+            }
+            
+            if (selectedMatchItems[type]) { 
+                selectedMatchItems[type].classList.remove('selected');
+            }
+            
+            selectedElement.classList.add('selected');
+            selectedMatchItems[type] = selectedElement;
+
+            if (selectedMatchItems.english && selectedMatchItems.chinese) {
+                checkMatchPair();
+            }
+        }
+
+        function checkMatchPair() {
+            const englishItem = selectedMatchItems.english;
+            const chineseItem = selectedMatchItems.chinese;
+
+            if (englishItem.dataset.id === chineseItem.dataset.id) {
+                englishItem.classList.add('matched');
+                englishItem.classList.remove('selected');
+                chineseItem.classList.add('matched');
+                chineseItem.classList.remove('selected');
+                score++; 
+                scoreDisplay.textContent = score; 
+                matchFeedbackEl.textContent = '配對成功！👍';
+                matchFeedbackEl.className = 'feedback-message correct';
+
+                const allItemsInCurrentRound = englishWordsColumnEl.children.length * 2; 
+                const matchedItemsInCurrentRound = document.querySelectorAll('#matchModeArea .match-item.matched').length;
+
+                if (matchedItemsInCurrentRound === allItemsInCurrentRound) {
+                    matchFeedbackEl.textContent = '本組全部配對正確！ ';
+                    matchNextBtn.style.display = 'inline-block';
+                }
+                 selectedMatchItems = { english: null, chinese: null }; // Reset for next pair
+
+            } else {
+                matchFeedbackEl.textContent = '配對錯誤，請再試一次！';
+                matchFeedbackEl.className = 'feedback-message wrong';
+                englishItem.classList.add('wrong-flash');
+                chineseItem.classList.add('wrong-flash');
+                setTimeout(() => {
+                    englishItem.classList.remove('wrong-flash', 'selected');
+                    chineseItem.classList.remove('wrong-flash', 'selected');
+                     selectedMatchItems.english = null; 
+                     selectedMatchItems.chinese = null;
+                }, 700); 
+            }
+        }
+
+
+        function nextQuestion() {
+            if (currentGameMode === 'match') {
+                // Clear matched items visually for the new round
+                document.querySelectorAll('#matchModeArea .match-item.matched').forEach(item => {
+                    item.classList.remove('matched'); // Or simply repopulate via displayMatchGame
+                });
+                currentWordIndex += totalWordsInRound; 
+                if (currentWordIndex >= wordsForCurrentGame.length) {
+                    showFinalScore();
+                } else {
+                    displayMatchGame(); 
+                }
+            } else { 
+                currentWordIndex++;
+                if (currentWordIndex >= wordsForCurrentGame.length) {
+                    showFinalScore();
+                } else {
+                    if (currentGameMode === 'quiz') displayQuizQuestion();
+                    else if (currentGameMode === 'typing') displayTypingQuestion();
+                }
+            }
+        }
+        
+        function updateProgress() {
+            let progressPercent = 0;
+            if (wordsForCurrentGame.length > 0) {
+                if (currentGameMode === 'match') {
+                    const currentRoundNumber = Math.floor(currentWordIndex / MATCH_GAME_WORDS_PER_ROUND);
+                    const totalRounds = Math.ceil(wordsForCurrentGame.length / MATCH_GAME_WORDS_PER_ROUND);
+                    progressPercent = totalRounds > 0 ? (currentRoundNumber / totalRounds) * 100 : 0;
+                } else if (currentGameMode === 'study') {
+                    progressPercent = ((currentWordIndex +1) / wordsForCurrentGame.length) * 100;
+                }
+                else { 
+                     progressPercent = (currentWordIndex / wordsForCurrentGame.length) * 100;
+                }
+            }
+            progressBar.style.width = progressPercent + '%';
+        }
+
+        function showFinalScore() {
+            let totalScorableItems = wordsForCurrentGame.length;
+            // In match mode, score is per pair, and totalScorableItems is the number of words (pairs)
+            // In quiz/typing, it's per question.
+
+            const percentage = totalScorableItems > 0 ? Math.round((score / totalScorableItems) * 100) : 0;
+            let message = '';
+            
+            if (percentage >= 90) message = '太棒了！你是多益單字達人！🌟';
+            else if (percentage >= 70) message = '很好！繼續加油！👍';
+            else if (percentage >= 50) message = '不錯！多練習會更好！💪';
+            else message = '加油！多練習就會進步！📚';
+
+            // Clear specific game areas and show final score
+            studyArea.style.display = 'none';
+            quizArea.style.display = 'none';
+            typingArea.style.display = 'none';
+            matchModeArea.style.display = 'none';
+            document.querySelector('.score-board').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+            // Hide the specific "Back to Menu" button inside gameArea if it exists,
+            // as we are adding a new one with the final score.
+            const existingBackToMenuBtn = gameArea.querySelector('.action-btn[onclick="backToMenu()"]');
+            if(existingBackToMenuBtn) existingBackToMenuBtn.style.display = 'none';
+
+
+            const finalScoreHTML = `
+                <div class="feedback-message correct" style="text-align:center; padding: 30px; display:block;">
+                    <h2>遊戲結束！</h2>
+                    <p style="font-size: 1.2em; margin: 15px 0;">${message}</p>
+                    <p style="font-size: 1.5em; font-weight:bold; margin: 15px 0;">總分：${score} / ${totalScorableItems} (${percentage}%)</p>
+                    <button class="action-btn" onclick="backToMenu(true)">回到主選單</button>
+                </div>
+            `;
+            // Append final score to gameArea, or replace its content
+            // To avoid duplicating the "Back to Menu" button, let's clear gameArea first if it's not already structured for this.
+            // For simplicity, let's ensure the gameArea is clean before adding this.
+            // A better approach would be to have a dedicated div for final score.
+            const tempDiv = document.createElement('div'); // Create a temporary div to hold the final score
+            while (gameArea.firstChild) {
+                gameArea.removeChild(gameArea.firstChild);
+            }
+            tempDiv.innerHTML = finalScoreHTML;
+            gameArea.appendChild(tempDiv);
+            gameArea.style.display = 'block';
+        }
+
+        function backToMenu(isEndOfGame = false) {
+            if (isEndOfGame) {
+                 location.reload(); // Simplest way to fully reset the page state
+                 return;
+            }
+
+            gameArea.style.display = 'none';
+             // Restore visibility of elements hidden during game start
+            document.querySelector('.game-modes').style.display = 'grid'; 
+            document.querySelector('.unit-selector').style.display = 'block';
+            // Also restore score board and progress bar to their initial state if needed for next game start
+            document.querySelector('.score-board').style.display = 'flex'; // Assuming it's flex
+            document.querySelector('.progress-bar').style.display = 'block';
+            progressBar.style.width = '0%'; // Reset progress bar fill
+
+            unitSelect.value = ""; 
+        }
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Hide game area parts initially, show main menu
+            gameArea.style.display = 'none';
+            document.querySelectorAll('.question-card, .study-card, #matchModeArea').forEach(area => area.style.display = 'none');
+            document.querySelector('.score-board').style.display = 'flex'; 
+            document.querySelector('.progress-bar').style.display = 'block';
+        });
+
+    </script>
+</body>
+</html>
+ 
